@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>t474-r0b07 · red teamer in progress · Bolivia</title>
+  <meta name="description" content="t474-r0b07 — red teamer in progress, systems builder from Bolivia. CTF writeups, cybersecurity, offensive security, and the t474 hacking game universe.">
+  <meta name="keywords" content="red team, CTF writeups, cybersecurity, Bolivia, hacking, picoCTF, HackTheBox, TryHackMe, OverTheWire, Flutter, offensive security, buffer overflow, forensics, steganography, t474">
+  <meta name="author" content="t474-r0b07">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://t474-r0b07.github.io">
+  <meta property="og:title" content="t474-r0b07 · red teamer in progress">
+  <meta property="og:description" content="Systems builder. CTF player. Bolivia. Not the flag — the thinking.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://t474-r0b07.github.io">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"t474-r0b07","url":"https://t474-r0b07.github.io","sameAs":["https://github.com/t474-r0b07","https://youtube.com/@kaderd.garnica"],"jobTitle":"Red Teamer in Progress, Systems Builder","description":"CTF player, offensive security learner, and systems developer from Bolivia.","knowsAbout":["CTF","Red Team","Cybersecurity","Buffer Overflow","Forensics","Steganography","Flutter","Supabase","Offensive Security","HackTheBox","TryHackMe","OverTheWire","picoCTF"]}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0d0d0d; --fg:#c8ffc8; --dim:#4a7a4a; --accent:#90ff90;
+      --muted:#1a321a; --muted2:#2a4a2a; --prompt:#3a6a3a; --arrow:#2d5a2d;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html{background:#000;min-height:100%;}
+    body{
+      width:100%;min-height:100vh;background:var(--bg);color:var(--fg);
+      font-family:'Share Tech Mono',monospace;font-size:15px;line-height:1.75;
+      box-shadow:inset 0 0 120px rgba(0,255,65,0.04);
+      border-radius:8px;overflow-y:auto;overflow-x:hidden;
+      animation:flicker 9s infinite;
+    }
+    @keyframes flicker{
+      0%,100%{opacity:1;}92%{opacity:1;}92.5%{opacity:0.82;}
+      93%{opacity:1;}96%{opacity:1;}96.3%{opacity:0.91;}96.6%{opacity:1;}
+    }
+    body::before{
+      content:'';position:fixed;inset:0;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px);
+      pointer-events:none;z-index:100;border-radius:inherit;
+    }
+    body::after{
+      content:'';position:fixed;inset:0;
+      background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.72) 100%);
+      pointer-events:none;z-index:99;border-radius:inherit;
+    }
+    .seo{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+    .screen{
+      min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+      padding:clamp(2.5rem,10vw,7rem);max-width:680px;
+    }
+    .cmd-line{display:flex;align-items:baseline;gap:0.5rem;opacity:0;transition:opacity 0.15s;}
+    .cmd-line.shown{opacity:1;}
+    .prompt{color:var(--prompt);font-size:13px;font-weight:300;flex-shrink:0;letter-spacing:0.05em;}
+    .cmd-text{color:var(--dim);font-size:13px;font-weight:300;letter-spacing:0.02em;}
+    .cur{display:inline-block;width:8px;height:14px;background:var(--dim);vertical-align:middle;margin-left:1px;animation:blink 1s step-end infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .out-line{display:flex;align-items:baseline;gap:0.5rem;opacity:0;transition:opacity 0.15s;}
+    .out-line.shown{opacity:1;}
+    .arrow{color:var(--arrow);font-size:13px;font-weight:300;flex-shrink:0;}
+    .out-text{color:var(--fg);font-size:15px;font-weight:700;letter-spacing:0.01em;}
+    .out-text.soft{font-weight:400;color:var(--dim);font-size:14px;}
+    .out-text .hi{color:var(--accent);font-weight:700;}
+    .out-text .lo{color:var(--dim);font-weight:300;font-size:13px;}
+    .gap{height:1.1rem;}.gap-sm{height:0.5rem;}
+    .opts{display:flex;flex-direction:column;gap:0;padding-left:1.3rem;}
+    .opts.row{flex-direction:row;flex-wrap:wrap;gap:0.3rem 1.4rem;}
+    .opt{
+      background:none;border:none;color:var(--dim);
+      font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:300;
+      cursor:pointer;text-align:left;padding:0.15rem 0;line-height:1.9;
+      opacity:0;animation:optIn 0.2s forwards;
+      transition:color 0.12s,padding-left 0.12s;letter-spacing:0.02em;
+    }
+    .opt::before{content:'[ ';color:var(--muted2);transition:color 0.12s;}
+    .opt::after{content:' ]';color:var(--muted2);transition:color 0.12s;}
+    .opt:hover,.opt:focus{color:var(--accent);font-weight:700;padding-left:0.5rem;outline:none;}
+    .opt:hover::before,.opt:focus::before,.opt:hover::after,.opt:focus::after{color:var(--accent);}
+    @keyframes optIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+    .back{
+      background:none;border:none;color:var(--muted2);
+      font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:300;
+      cursor:pointer;padding:0;margin-top:1.8rem;display:block;
+      transition:color 0.15s;letter-spacing:0.05em;
+    }
+    .back:hover{color:var(--dim);}
+    .prow{
+      display:grid;grid-template-columns:150px 1fr 52px;align-items:center;
+      gap:0.6rem;font-size:13px;opacity:0;transition:opacity 0.2s;
+      margin-bottom:0.4rem;padding-left:1.3rem;
+    }
+    .prow.shown{opacity:1;}
+    .plabel{color:var(--dim);font-weight:300;}
+    .plabel strong{color:var(--fg);font-weight:700;}
+    .pbar{height:3px;background:var(--muted);overflow:hidden;}
+    .pfill{height:100%;width:0;transition:width 1.4s ease;}
+    .pfill.done{background:var(--fg);}
+    .pfill.warn{background:#8a6a00;}
+    .pfill.crit{background:#7a2020;}
+    .ppct{color:var(--muted2);font-size:11px;text-align:right;font-weight:300;}
+    a{color:var(--dim);text-underline-offset:3px;}
+    a:hover{color:var(--fg);}
+
+    /* ── splash screen ── */
+    #splash {
+      position:fixed; inset:0; background:var(--bg);
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      z-index:500;
+      transition: opacity 0.6s ease;
+    }
+    #splash.fade-out { opacity:0; pointer-events:none; }
+
+    #splash-canvas {
+      width: 240px; height: 240px;
+      image-rendering: pixelated;
+    }
+
+    #splash-label {
+      font-family:'Share Tech Mono',monospace;
+      font-size:13px; color:var(--dim);
+      margin-top:1rem; letter-spacing:0.15em;
+      opacity:0; animation: splashLabel 0.4s 1.2s forwards;
+    }
+    @keyframes splashLabel {
+      from{opacity:0;} to{opacity:1;}
+    }
+
+    /* ── canvas banners ── */
+    .anim-wrap{
+      position:relative;width:100%;max-width:560px;
+      margin:0.8rem 0 1rem 0;border:1px solid var(--muted2);
+      line-height:0;overflow:hidden;
+    }
+    .anim-wrap canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;}
+    .anim-replay{
+      position:absolute;bottom:7px;right:8px;
+      background:transparent;border:1px solid #00ff41;color:#00ff41;
+      font-family:'Share Tech Mono',monospace;font-size:10px;
+      padding:3px 8px;cursor:pointer;letter-spacing:2px;
+      opacity:0;transition:opacity 0.4s;pointer-events:none;
+    }
+    .anim-replay.visible{opacity:1;pointer-events:auto;}
+    .anim-replay:hover{background:rgba(0,255,65,0.08);}
+
+    @media(max-width:480px){
+      .screen{padding:2rem 1.5rem;}
+      .prow{grid-template-columns:110px 1fr 38px;}
+      .opts.row{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+<div class="seo">
+  <h1>t474-r0b07 — Red Teamer in Progress, Systems Builder, Bolivia</h1>
+  <p>CTF player and offensive security learner from Bolivia. Focused on red teaming, cybersecurity, CTF writeups, and systems development.</p>
+  <h2>Projects</h2>
+  <ul>
+    <li>SCCP-DTEX — Tactical law enforcement command center. Flutter, Supabase, real-time GPS, anti-spoofing.</li>
+    <li>SCCP-Mobile — Android field app for tactical units. Offline-first, root detection, VPN fingerprinting.</li>
+    <li>CTF Writeups — picoCTF, TryHackMe, OverTheWire Bandit and Leviathan completed, HackTheBox. Forensics, steganography, buffer overflow.</li>
+    <li>t474 — Narrative hacking game, terminal-based, lore-driven. In development.</li>
+  </ul>
+  <p>GitHub: github.com/t474-r0b07 — YouTube: youtube.com/@kaderd.garnica — Bolivia</p>
+</div>
+
+<div id="splash">
+  <canvas id="splash-canvas" width="240" height="240"></canvas>
+  <div id="splash-label">// initializing</div>
+</div>
+<div class="screen"><div id="out"></div></div>
+
+<script>
+const container = document.getElementById('out');
+let busy = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function gap(sm){ const e=document.createElement('div');e.className=sm?'gap-sm':'gap';container.appendChild(e); }
+
+async function cmd(text, speed=22){
+  const row=document.createElement('div'); row.className='cmd-line';
+  const p=document.createElement('span'); p.className='prompt'; p.textContent='$';
+  const t=document.createElement('span'); t.className='cmd-text';
+  row.appendChild(p); row.appendChild(t); container.appendChild(row);
+  await sleep(30); row.classList.add('shown');
+  const cur=document.createElement('span'); cur.className='cur'; t.appendChild(cur);
+  for(let i=0;i<=text.length;i++){t.innerHTML=text.slice(0,i);t.appendChild(cur);await sleep(speed+Math.random()*10);}
+  cur.remove(); return row;
+}
+
+async function out(html, soft=false, delay=40){
+  await sleep(delay);
+  const row=document.createElement('div'); row.className='out-line';
+  row.innerHTML=`<span class="arrow">&gt;</span><span class="out-text${soft?' soft':''}">${html}</span>`;
+  container.appendChild(row); await sleep(20); row.classList.add('shown');
+  row.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return row;
+}
+
+async function showOpts(items, row=false){
+  const wrap=document.createElement('div');
+  wrap.className='opts'+(row?' row':''); container.appendChild(wrap);
+  for(const item of items){
+    await sleep(100);
+    const btn=document.createElement('button'); btn.className='opt';
+    btn.textContent=item.label;
+    btn.onclick=()=>{if(!busy)item.action();};
+    wrap.appendChild(btn);
+  }
+}
+
+function addBack(fn){
+  const btn=document.createElement('button'); btn.className='back'; btn.textContent='← back';
+  btn.onclick=()=>{if(!busy)fn();}; container.appendChild(btn);
+}
+
+function clear(){ container.innerHTML=''; }
+
+// ══════════════════════════════════════════════════════════════
+// ANIMATIONS
+// ══════════════════════════════════════════════════════════════
+
+const C={black:'#000d00',dark:'#0a1f0a',mid:'#1a4d1a',bright:'#39d939',white:'#a8ff78',glow:'#00ff41'};
+
+function makeCanvas(w,h){
+  const wrap=document.createElement('div'); wrap.className='anim-wrap';
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+  const btn=document.createElement('button'); btn.className='anim-replay'; btn.textContent='▶ REPLAY';
+  wrap.appendChild(cv); wrap.appendChild(btn); container.appendChild(wrap);
+  return {cv,btn,wrap};
+}
+
+// ── Ariane 5: rocket launch & explosion ──────────────────────
+function animAriane5(cv, btn){
+  const W=560,H=224,SC=2,GW=W/SC,GH=H/SC;
+  let t=0,phase='launch',rocketY=0,explodeT=0,particles=[],smoke=[];
+  let shakeX=0,shakeY=0,fadeAlpha=0,launched=false,countdown=70,raf=null;
+  const stars=Array.from({length:50},()=>({x:Math.random()*GW,y:Math.random()*GH*0.6,blink:Math.random()*Math.PI*2,sz:Math.random()<0.2?2:1}));
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  function px(x,y,col,s=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC+shakeX,Math.round(y)*SC+shakeY,SC*s,SC*s);}
+  function reset(){t=0;phase='launch';rocketY=0;explodeT=0;particles=[];smoke=[];shakeX=0;shakeY=0;fadeAlpha=0;launched=false;countdown=70;btn.classList.remove('visible');}
+  btn.onclick=()=>{cancelAnimationFrame(raf);reset();tick();};
+  function tick(){
+    t++; ctx.fillStyle=C.black; ctx.fillRect(0,0,W,H);
+    const CX=GW/2,GY=GH-8;
+    if(phase==='launch'&&launched){shakeX=((Math.random()-.5)*3)|0;shakeY=((Math.random()-.5)*2)|0;}
+    else if(phase==='explode'&&explodeT<20){const sf=Math.max(0,1-explodeT/20)*4;shakeX=((Math.random()-.5)*sf)|0;shakeY=((Math.random()-.5)*sf)|0;}
+    else{shakeX=0;shakeY=0;}
+    // stars
+    for(const s of stars){const b=Math.sin(t*0.05+s.blink);if(b>0.3)px(s.x,s.y,b>0.8?C.glow:C.mid,s.sz);}
+    // trees
+    const rows=[3,5,7,5,7,5,3];
+    function drawTree(x,y,h){for(let i=0;i<Math.min(rows.length,h);i++){const w=rows[i];for(let j=0;j<w;j++){const lx=x+j-Math.floor(w/2);px(lx,y-i,(i===0||j===0||j===w-1)?C.mid:C.bright);}}}
+    function drawGround(gy){for(let xx=0;xx<GW;xx++){px(xx,gy,C.mid);px(xx,gy+1,C.dark);}for(let xx=-9;xx<=9;xx++)px(CX+xx,gy-1,C.mid);}
+    function drawTower(cx,cy){for(let yy=0;yy<26;yy++){px(cx,cy-yy,C.mid);px(cx+5,cy-yy,C.mid);if(yy%5===0)for(let xx=0;xx<=5;xx++)px(cx+xx,cy-yy,C.mid);}}
+    function drawRocket(cx,ry){
+      px(cx,ry,C.glow);px(cx-1,ry+1,C.bright);px(cx,ry+1,C.glow);px(cx+1,ry+1,C.bright);
+      for(let yy=2;yy<12;yy++){px(cx-1,ry+yy,C.mid);px(cx,ry+yy,C.bright);px(cx+1,ry+yy,C.mid);}
+      px(cx-2,ry+10,C.mid);px(cx+2,ry+10,C.mid);px(cx-1,ry+12,C.mid);px(cx,ry+12,C.mid);px(cx+1,ry+12,C.mid);
+    }
+    function drawExhaust(cx,ry,inten){const len=Math.floor(4+inten*10);for(let yy=0;yy<len;yy++){const sp=Math.floor(yy/3);for(let xx=-sp;xx<=sp;xx++){let col=yy<3?C.white:yy<6?C.glow:C.bright;px(cx+xx,ry+13+yy,col);}}}
+    if(phase==='launch'||phase==='fly'){
+      for(let i=0;i<4;i++)drawTree(4+i*13,GY-9,5+i%3);
+      for(let i=0;i<4;i++)drawTree(GW-8-i*13,GY-9,5+i%3);
+      drawTower(CX+16,GY-1);drawGround(GY);
+      if(!launched){
+        countdown--;drawRocket(CX,GY-15);
+        if(countdown<30){const i=(30-countdown)/30;drawExhaust(CX,GY-15,i*.5);}
+        if(countdown<=0){launched=true;rocketY=GY-15;}
+      } else {
+        const spd=Math.max(.3,.3+(GY-15-rocketY)*.012); rocketY-=spd;
+        const ry=Math.floor(rocketY);
+        // smoke
+        if(t%2===0)smoke.push({x:CX+(Math.random()-.5)*4,y:ry+15,vy:.1+Math.random()*.2,vx:(Math.random()-.5)*.3,life:1,r:1+Math.floor(Math.random()*3)});
+        for(const s of smoke){s.x+=s.vx;s.y+=s.vy;s.life-=.02;s.r+=.05;}
+        smoke=smoke.filter(s=>s.life>0);
+        for(const s of smoke){ctx.globalAlpha=s.life*0.4;const r=Math.floor(s.r);for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)if(dx*dx+dy*dy<=r*r)px(Math.floor(s.x)+dx,Math.floor(s.y)+dy,C.dark);ctx.globalAlpha=1;}
+        drawExhaust(CX,ry,.9);drawRocket(CX,ry);
+        if(rocketY<-5){
+          phase='explode';explodeT=0;
+          for(let i=0;i<120;i++){const a=Math.random()*Math.PI*2,sp=.5+Math.random()*3.5;particles.push({x:CX,y:5,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-Math.random()*2,life:.8+Math.random()*.2,color:[C.white,C.glow,C.bright,C.mid][Math.floor(Math.random()*4)],sz:Math.random()<.3?2:1});}
+        }
+      }
+    }
+    if(phase==='explode'){
+      for(let i=0;i<4;i++)drawTree(4+i*13,GY-9,5+i%3);drawTower(CX+16,GY-1);drawGround(GY);
+      explodeT++;
+      if(explodeT<8){ctx.fillStyle=`rgba(0,255,65,${Math.max(0,.9-explodeT*.12)})`;ctx.fillRect(0,0,W,H);}
+      if(explodeT<30){ctx.strokeStyle=explodeT<10?C.white:C.glow;ctx.lineWidth=SC;ctx.globalAlpha=Math.max(0,1-explodeT/30);ctx.beginPath();ctx.arc(CX*SC,5*SC,explodeT*2*SC,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
+      for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.07;p.life-=.013;}
+      particles=particles.filter(p=>p.life>0);
+      for(const p of particles){ctx.globalAlpha=p.life;px(Math.floor(p.x),Math.floor(p.y),p.color,p.sz);ctx.globalAlpha=1;}
+      if(explodeT>120&&particles.length===0)phase='done';
+    }
+    if(phase==='done'){
+      fadeAlpha=Math.min(1,fadeAlpha+.008);
+      ctx.fillStyle=`rgba(0,10,0,${fadeAlpha*.7})`;ctx.fillRect(0,0,W,H);
+      if(fadeAlpha>=.5)btn.classList.add('visible');
+      if(fadeAlpha<1){raf=requestAnimationFrame(tick);return;}
+      return;
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Danny Cohen: big-endian vs little-endian byte war ────────
+function animDannyCohen(cv, btn){
+  const W=560,H=180,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase='fight',endT=0,fadeAlpha=0;
+  const BYTES=['01','00','00','04'];
+  const BIG=[[...BYTES]]; // big-endian order
+  const LIT=[[...BYTES].reverse()]; // little-endian order
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function drawByte(x,y,val,col){
+    ctx.fillStyle=col;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
+    ctx.fillText(val,Math.round(x)*SC,Math.round(y+5)*SC);
+  }
+  function drawArrow(x1,y,x2,col){
+    ctx.fillStyle=col;
+    const dir=x2>x1?1:-1;
+    for(let i=0;i<Math.abs(x2-x1);i+=2)px(x1+i*dir,y,col);
+    px(x2,y,col); px(x2-dir,y-1,col); px(x2-dir,y+1,col);
+  }
+  function reset(){t=0;phase='fight';endT=0;fadeAlpha=0;btn.classList.remove('visible');}
+  btn.onclick=()=>{cancelAnimationFrame(raf);reset();tick();};
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    const cy=GH/2;
+    // labels
+    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
+    ctx.fillStyle=C.bright;
+    ctx.fillText('BIG-ENDIAN',4*SC,10*SC);
+    ctx.fillStyle=C.mid;
+    ctx.fillText('LITTLE-ENDIAN',4*SC,(cy+14)*SC);
+
+    // value being "stored"
+    const val32='0x00000401';
+    ctx.fillStyle=C.glow;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
+    ctx.fillText(val32,GW/2*SC,8*SC);
+
+    // animate bytes marching
+    const bytesBig =['00','00','04','01'];
+    const bytesLit =['01','04','00','00'];
+    const spacing=14;
+    const startX=GW/2-spacing*1.5;
+
+    for(let i=0;i<4;i++){
+      const offset=Math.sin(t*0.05+i)*1.5;
+      // big endian row — bytes flow left to right in natural order
+      const bx=startX+i*spacing;
+      const pulse=Math.sin(t*0.08+i*0.8)>0.5;
+      drawByte(bx,cy-18+offset,bytesBig[i],pulse?C.white:C.bright);
+      // box
+      ctx.strokeStyle=C.mid;ctx.lineWidth=1;
+      ctx.strokeRect((bx-5)*SC,(cy-24)*SC,10*SC,10*SC);
+
+      // little endian row — reversed
+      const lx=startX+i*spacing;
+      const pulse2=Math.sin(t*0.08+(3-i)*0.8)>0.5;
+      drawByte(lx,cy+6+offset,bytesLit[i],pulse2?C.glow:C.mid);
+      ctx.strokeStyle=C.dark||'#0a1f0a';ctx.lineWidth=1;
+      ctx.strokeRect((lx-5)*SC,(cy)*SC,10*SC,10*SC);
+    }
+
+    // collision sparks in middle
+    const sparkX=GW/2+Math.sin(t*0.3)*3;
+    const sparkY=cy-6;
+    if(t%3===0){
+      for(let i=0;i<3;i++){
+        const sx=sparkX+(Math.random()-.5)*8;
+        const sy=sparkY+(Math.random()-.5)*4;
+        px(sx,sy,Math.random()>0.5?C.glow:C.white);
+      }
+    }
+    ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('← conflict →',GW/2*SC,(cy-8)*SC);
+
+    // label at bottom
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+    ctx.fillText('"On Holy Wars and a Plea for Peace" — Danny Cohen, 1980',GW/2*SC,(GH-5)*SC);
+
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Little Endian: number inverting in memory ─────────────────
+function animLittleEndian(cv, btn){
+  const W=560,H=180,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null;
+  const addresses=['0x00','0x01','0x02','0x03'];
+  const valBig=['00','00','00','01']; // big: most significant first
+  const valLit=['01','00','00','00']; // little: least significant first
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;tick();};
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    const cols=4,cellW=22,cellH=16;
+    const startX=(GW-(cols*cellW+cols*4))/2;
+    const rowBig=GH/2-18,rowLit=GH/2+8;
+    const progress=Math.min(1,t/80); // 0→1 over 80 frames
+
+    ctx.fillStyle=C.glow;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
+    ctx.fillText('0x00000001',GW/2*SC,9*SC);
+
+    ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+    ctx.fillText('big-endian    (natural order):',startX*SC,rowBig*SC-6*SC);
+    ctx.fillStyle=C.mid;
+    ctx.fillText('little-endian (memory order): ',startX*SC,rowLit*SC-6*SC);
+
+    for(let i=0;i<4;i++){
+      const x=startX+i*(cellW+4);
+      // address
+      ctx.fillStyle=C.dim||'#2a4a2a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText(addresses[i],(x+cellW/2)*SC,(rowBig-8)*SC);
+
+      // big endian cell
+      ctx.strokeStyle=C.mid;ctx.lineWidth=1;
+      ctx.strokeRect(x*SC,rowBig*SC,cellW*SC,cellH*SC);
+      const bigAlpha=Math.max(0,progress*2-i*0.4);
+      ctx.globalAlpha=Math.min(1,bigAlpha);
+      ctx.fillStyle=C.bright;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+      ctx.fillText(valBig[i],(x+cellW/2)*SC,(rowBig+cellH*0.7)*SC);
+      ctx.globalAlpha=1;
+
+      // little endian cell — bytes appear in reverse
+      ctx.strokeStyle=C.glow;ctx.lineWidth=1;
+      ctx.strokeRect(x*SC,rowLit*SC,cellW*SC,cellH*SC);
+      const litAlpha=Math.max(0,progress*2-(3-i)*0.4);
+      ctx.globalAlpha=Math.min(1,litAlpha);
+      ctx.fillStyle=i===0?C.glow:C.mid;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+      ctx.fillText(valLit[i],(x+cellW/2)*SC,(rowLit+cellH*0.7)*SC);
+      ctx.globalAlpha=1;
+    }
+
+    // arrow showing reversal
+    if(progress>0.7){
+      const alpha=(progress-0.7)/0.3;
+      ctx.globalAlpha=alpha;
+      ctx.strokeStyle=C.glow;ctx.lineWidth=SC;
+      ctx.beginPath();
+      ctx.moveTo((startX+cellW*0.5)*SC,(rowBig+cellH+2)*SC);
+      ctx.lineTo((startX+cellW*4+12+cellW*0.5)*SC,(rowLit-2)*SC);
+      ctx.stroke();
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('reversed in memory',GW/2*SC,(rowBig+cellH+10)*SC);
+      ctx.globalAlpha=1;
+    }
+
+    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('x86 · ARM · most modern CPUs store this way',(GW/2)*SC,(GH-5)*SC);
+
+    if(t<240)raf=requestAnimationFrame(tick);
+    else btn.classList.add('visible');
+  }
+  tick();
+}
+
+// ── Jerry Saltzer: 0xDEADBEEF appearing in memory dump ───────
+function animJerrySaltzer(cv, btn){
+  const W=560,H=180,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null;
+  const targetHex='DEADBEEF';
+  const rows=6,cols=8;
+  const cellW=10,cellH=10;
+  const startX=(GW-(cols*cellW+cols*2))/2;
+  const startY=12;
+  // random hex grid
+  let grid=Array.from({length:rows},()=>Array.from({length:cols},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase()));
+  // place DEADBEEF in row 3, cols 0-3 (each byte = 2 hex chars, we show as single cells)
+  const deadRow=3,deadCol=2;
+  const deadBytes=['DE','AD','BE','EF'];
+  let revealT=0;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;revealT=0;grid=Array.from({length:rows},()=>Array.from({length:cols},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase()));tick();btn.classList.remove('visible');};
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+
+    // title
+    ctx.fillStyle=C.glow;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
+    const glitch=t>60&&t%40<3;
+    ctx.fillText(glitch?'0xDE??BEEF':'0xDEADBEEF',GW/2*SC,9*SC);
+
+    // randomize non-dead cells slowly
+    if(t%8===0){
+      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+        const isDead=r===deadRow&&c>=deadCol&&c<deadCol+4;
+        if(!isDead)grid[r][c]=Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase();
+      }
+    }
+
+    // reveal DEADBEEF after t=60
+    if(t>60){
+      revealT++;
+      const byteIdx=Math.floor(revealT/20);
+      for(let i=0;i<=Math.min(byteIdx,3);i++){
+        grid[deadRow][deadCol+i]=deadBytes[i];
+      }
+    }
+
+    // draw grid
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const x=startX+c*(cellW+2);
+        const y=startY+r*(cellH+2);
+        const isDead=r===deadRow&&c>=deadCol&&c<deadCol+4&&t>60;
+        const isRevealed=isDead&&grid[r][c]===deadBytes[c-deadCol];
+        ctx.fillStyle=isRevealed?C.glow:isDead?C.bright:C.mid;
+        ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+        if(isRevealed){
+          // glow box
+          ctx.fillStyle='rgba(0,255,65,0.1)';
+          ctx.fillRect(x*SC,(y-1)*SC,cellW*SC,(cellH+1)*SC);
+          ctx.fillStyle=C.glow;
+        } else {
+          ctx.fillStyle=C.mid;
+        }
+        ctx.fillText(grid[r][c],(x+cellW/2)*SC,(y+cellH*0.75)*SC);
+      }
+      // address
+      ctx.fillStyle=C.dark||'#0a1f0a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='right';
+      ctx.fillText(`0x${(0x7fff0+r*8).toString(16).toUpperCase()}`,(startX-3)*SC,(startY+r*(cellH+2)+cellH*0.75)*SC);
+    }
+
+    // label after full reveal
+    if(t>140){
+      const alpha=Math.min(1,(t-140)/30);
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('not random. intentional. someone put it there.',(GW/2)*SC,(GH-5)*SC);
+      ctx.globalAlpha=1;
+    }
+
+    if(t>220)btn.classList.add('visible');
+    else raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════════════════════════
+
+async function main(){
+  busy=true;clear();
+  await sleep(400);
+  await cmd('whoami',30);
+  await out('<span class="hi">t474-r0b07</span>');
+  gap(true);
+  await cmd('cat /etc/identity',20);
+  await out('red teamer in progress &nbsp;·&nbsp; systems builder');
+  await out('<span class="lo">Bolivia 🇧🇴</span>',true,20);
+  gap(true);
+  await cmd('ls -la',20);
+  await out('<span class="lo">projects &nbsp; progress &nbsp; lore &nbsp; contact</span>',true,30);
+  gap();
+  busy=false;
+  await showOpts([
+    {label:'projects',action:screenProjects},
+    {label:'progress',action:screenProgress},
+    {label:'lore',    action:screenLore},
+    {label:'contact', action:screenContact},
+  ]);
+}
+
+async function screenProjects(){
+  busy=true;clear();
+  await cmd('ls -la projects/',20);
+  await out('<span class="lo">4 repositories found</span>',true);
+  gap();
+  busy=false;
+  await showOpts([
+    {label:'SCCP-DTEX',   action:()=>screenProjectDetail({
+      name:'SCCP-DTEX',tag:'LIVE',
+      desc:'Tactical law enforcement command center — WebApp',
+      stack:'Flutter Web · Supabase · GetX · Clean Architecture',
+      detail:'GPS spoofing detection · role-based access · full audit trail · real-time &lt;1s',
+      highlights:[
+        'Built with offensive thinking: every feature is a countermeasure.',
+        'VPN detection · root detection · full GPS anomaly logging.',
+        'Role-based access: operators, supervisors, commanders.',
+      ],
+      url:'https://github.com/t474-r0b07/SCCP-DTEX',
+      extended:[
+        'Sistema desplegado para unidades tácticas reales en Bolivia.',
+        'Arquitectura: Clean Architecture + GetX state management.',
+        'Supabase Realtime para actualizaciones GPS con latencia < 1 segundo.',
+        'Cada acción del operador queda registrada en audit trail inmutable.',
+        'Detecta VPN activa, GPS falso y dispositivos rooteados en tiempo real.',
+        '// construido pensando en cómo lo atacaría alguien.',
+      ]
+    })},
+    {label:'SCCP-Mobile', action:()=>screenProjectDetail({
+      name:'SCCP-Mobile',tag:'LIVE',
+      desc:'Android field app for tactical units',
+      stack:'Flutter · BLoC · Hive · Play Integrity API',
+      detail:'Offline-first · root detection · VPN fingerprinting · GPS anti-spoofing',
+      highlights:[
+        'The weakest point of a command platform is the device in the field.',
+        'Hive for offline persistence. Syncs when signal returns.',
+        'Play Integrity for device attestation at login.',
+      ],
+      url:'https://github.com/t474-r0b07/SCCP-Mobile',
+      extended:[
+        'App de campo: el oficial la usa mientras patrulla, sin depender del servidor.',
+        'Hive DB local — persiste misiones, incidentes y coordenadas offline.',
+        'Al recuperar señal, sincroniza automáticamente con el Command Center.',
+        'Play Integrity API: verifica que el dispositivo no está comprometido.',
+        'Background service: reporta GPS cada N segundos aunque la app esté minimizada.',
+        '// si el dispositivo está rooteado, el sistema lo sabe antes que el oficial.',
+      ]
+    })},
+    {label:'ctf-writeups',action:()=>screenProjectDetail({
+      name:'ctf-writeups',tag:'ACTIVE',
+      desc:'Not the flag — the thinking.',
+      stack:'picoCTF · TryHackMe · OverTheWire · HackTheBox',
+      detail:'Forensics · Steganography · Buffer Overflow · Cryptography',
+      highlights:[
+        'The [ATTEMPTS] section is the core. Not the solution.',
+        'OverTheWire Bandit: 34/34. Leviathan: 8/8. Narnia: active.',
+        'Lore folder: why the vulnerabilities exist in the first place.',
+      ],
+      url:'https://github.com/t474-r0b07/ctf-writeups',
+      extended:[
+        '// narnia0 — primer buffer overflow.',
+        'El programa lee input sin validar longitud. La pila se desborda.',
+        'Variable adyacente en memoria: val=0x41414141. Shell obtenida.',
+        '---',
+        'Cada writeup tiene una sección [ATTEMPTS] — los intentos fallidos.',
+        'El flag es incidental. El razonamiento es el contenido.',
+        'La carpeta /lore documenta por qué las vulnerabilidades existen.',
+        '// el que quiere entender, que entienda.',
+      ]
+    })},
+    {label:'t474',        action:()=>screenProjectDetail({
+      name:'t474',tag:'IN DEV',
+      desc:'Narrative hacking game — terminal-based, lore-driven',
+      stack:'// classified',
+      detail:'The interface IS the world. Not all puzzles look like puzzles.',
+      highlights:[
+        'A game where the terminal is not the UI. It is the world.',
+        'Lore-driven: every command has history behind it.',
+        '// more information is itself a vulnerability',
+      ],
+      url:'https://github.com/t474-r0b07/t474',
+      extended:[
+        '// access denied.',
+        '// clearance level insufficient.',
+        '// but you already knew that.',
+        '---',
+        'Lo que podemos decir: es un juego que se juega sin saber que estás jugando.',
+        'La narrativa y los puzzles coexisten en la misma interfaz.',
+        '// más información es en sí misma una vulnerabilidad.',
+      ]
+    })},
+  ]);
+  gap();
+  addBack(main);
+}
+
+async function screenProjectDetail(p){
+  busy=true;clear();
+  await cmd(`cat ${p.name}/README.md`,20);
+  gap(true);
+  await out(`<span class="hi">${p.name}</span> &nbsp;<span class="lo">[ ${p.tag} ]</span>`);
+  await out(p.desc,false,60);
+  gap(true);
+  await cmd('cat stack.txt',18);
+  await out(`<span class="lo">${p.stack}</span>`,true,40);
+  gap(true);
+  await cmd('cat features.txt',18);
+  await out(p.detail,false,40);
+  gap(true);
+  await cmd('cat notes.txt',18);
+  for(const h of p.highlights){
+    await out(h,true,30);
+  }
+  gap();
+  busy=false;
+
+  await showOpts([
+    {
+      label:'ver más',
+      action: async ()=>{
+        busy=true;
+        gap(true);
+        await cmd('cat details.txt',18);
+        for(const line of (p.extended||['// no additional data found.'])){
+          await out(line,true,25);
+        }
+        gap();
+        busy=false;
+        await showOpts([
+          {label:'github →',action:()=>open(p.url,'_blank')},
+        ]);
+        gap(true);
+        addBack(screenProjects);
+      }
+    },
+    {label:'github →', action:()=>open(p.url,'_blank')},
+  ]);
+
+  gap(true);
+  addBack(screenProjects);
+}
+
+async function screenProgress(){
+  busy=true;clear();
+  await cmd('tail -f progress.log',20);
+  await out('<span class="lo">reading live process...</span>',true,40);
+  gap();
+  const bars=[
+    {label:['OTW','Bandit'],   pct:100,note:'34/34',cls:'done'},
+    {label:['OTW','Leviathan'],pct:100,note:'8/8',  cls:'done'},
+    {label:['OTW','Narnia'],   pct:20, note:'active',cls:'warn'},
+    {label:['picoCTF','foren'],pct:80, note:'active',cls:'warn'},
+    {label:['HTB','blueteam'], pct:35, note:'35%',  cls:'warn'},
+    {label:['CVE','endgame'],  pct:2,  note:'←←←',  cls:'crit'},
+  ];
+  busy=false;
+  for(const b of bars){
+    await sleep(80);
+    const row=document.createElement('div'); row.className='prow';
+    row.innerHTML=`<span class="plabel"><strong>${b.label[0]}</strong> ${b.label[1]}</span><div class="pbar"><div class="pfill ${b.cls}"></div></div><span class="ppct">${b.note}</span>`;
+    container.appendChild(row);
+    await sleep(30); row.classList.add('shown');
+    const fill=row.querySelector('.pfill');
+    await sleep(60); fill.style.width=b.pct+'%';
+  }
+  gap();
+  addBack(main);
+}
+
+async function screenLore(){
+  busy=true;clear();
+  await cmd('cat /ctf-writeups/lore/README.md',20);
+  gap(true);
+  await out('archivos que nadie te va a pedir que leas.',true,60);
+  await out('archivos que no podés dejar de leer.',true,60);
+  gap(true);
+  await cmd('echo $ADVERTENCIA',18);
+  await out('el que ejecuta sin entender',false,40);
+  await out('es el primero en caer.',true,40);
+  gap();
+  busy=false;
+  await showOpts([
+    {label:'danny cohen',  action:()=>screenLoreEntry('danny cohen')},
+    {label:'little endian',action:()=>screenLoreEntry('little endian')},
+    {label:'jerry saltzer',action:()=>screenLoreEntry('jerry saltzer')},
+    {label:'ariane 5',     action:()=>screenLoreEntry('ariane 5')},
+  ]);
+  gap();
+  addBack(main);
+}
+
+async function screenLoreEntry(title){
+  busy=true;clear();
+  await cmd(`cat /lore/${title.replace(/ /g,'_')}.md`,20);
+  gap(true);
+  await out(`<span class="hi">${title}</span>`);
+  gap(true);
+
+  if(title==='ariane 5'){
+    await out('500 millones de dólares. 4 bytes.',false,60);
+    await out('El sistema funcionaba perfectamente. Para el cohete anterior.',true,80);
+    gap(true);
+    await cmd('echo $CONTEXT',18);
+    await out('Un integer overflow de 64-bit a 16-bit. 37 segundos de vuelo.',false,40);
+    gap(true);
+    const {cv,btn}=makeCanvas(560,224);
+    animAriane5(cv,btn);
+  }
+  else if(title==='danny cohen'){
+    await out('El hombre que nombró la guerra de los bytes.',false,60);
+    await out('Sin él, no habría nombre para el caos que ya existía.',true,80);
+    gap(true);
+    await cmd('echo $CONTEXT',18);
+    await out('Big-endian vs little-endian. Una decisión que dividió arquitecturas.',false,40);
+    gap(true);
+    const {cv,btn}=makeCanvas(560,180);
+    animDannyCohen(cv,btn);
+  }
+  else if(title==='little endian'){
+    await out('Por qué todo está al revés.',false,60);
+    await out('La arquitectura que ganó no era la más lógica. Era la más conveniente.',true,80);
+    gap(true);
+    await cmd('echo $CONTEXT',18);
+    await out('0x00000001 se guarda como 01 00 00 00. Siempre.',false,40);
+    gap(true);
+    const {cv,btn}=makeCanvas(560,180);
+    animLittleEndian(cv,btn);
+  }
+  else if(title==='jerry saltzer'){
+    await out('0xDEADBEEF no es un número random.',false,60);
+    await out('Alguien lo puso ahí. Alguien lo eligió. Hay una razón.',true,80);
+    gap(true);
+    await cmd('echo $CONTEXT',18);
+    await out('Los magic numbers no son magia. Son memoria de alguien que estuvo antes.',false,40);
+    gap(true);
+    const {cv,btn}=makeCanvas(560,180);
+    animJerrySaltzer(cv,btn);
+  }
+
+  gap(true);
+  await cmd('echo $SOURCE',18);
+  await out('<a href="https://github.com/t474-r0b07/ctf-writeups/tree/main/lore" target="_blank" rel="noopener">github.com/t474-r0b07/ctf-writeups/tree/main/lore</a>',true,40);
+  gap();
+  busy=false;
+  addBack(screenLore);
+}
+
+async function screenContact(){
+  busy=true;clear();
+  await cmd('cat contacts.txt',20);
+  gap(true);
+  await out('<span class="hi">t474-r0b07</span>');
+  await out('red teamer in progress · Bolivia 🇧🇴',true,40);
+  gap(true);
+  await cmd('echo $CHANNELS',18);
+  gap(true);
+  busy=false;
+  await showOpts([
+    {label:'github',   action:()=>open('https://github.com/t474-r0b07','_blank')},
+    {label:'youtube',  action:()=>open('https://youtube.com/@kaderd.garnica','_blank')},
+    {label:'email',    action:()=>open('mailto:dogar.kad@gmail.com')},
+    {label:'calendly', action:()=>open('https://calendly.com/t474_r0b07','_blank')},
+    {label:'quien soy',action:screenAbout},
+    {label:'ost · t474',action:screenOST},
+  ]);
+  gap();
+  addBack(main);
+}
+
+async function screenAbout(){
+  busy=true;clear();
+  await cmd('cat /etc/about.txt',20);
+  gap(true);
+  await out('<span class="hi">t474-r0b07</span> &nbsp;<span class="lo">// kader d. garnica</span>');
+  gap(true);
+
+  const lines = [
+    'Lic. en Comunicación Social.',
+    'Publicista. Diseñador gráfico. Filmmaker. Músico.',
+    'Desarrollador de sistemas. Red teamer en formación.',
+    '',
+    'Todo eso no es una contradicción.',
+    'Es el mismo instinto aplicado a distintos medios.',
+    '// entender cómo funciona algo. luego romperlo. luego construir algo mejor.',
+    '',
+    'Bolivia — pensando sin fronteras.',
+  ];
+
+  for(const l of lines){
+    await sleep(55);
+    if(l===''){gap(true);continue;}
+    const soft = l.startsWith('//') || l.startsWith('Lic') || l.startsWith('Pub') || l.startsWith('Bol');
+    await out(l, soft, 0);
+  }
+
+  gap(true);
+  await cmd('echo $PHILOSOPHY',18);
+  await out('not a musician.',true,40);
+  await out('not a filmmaker.',true,30);
+  await out('not a developer.',true,30);
+  gap(true);
+  await out('all of the above. none of the above.',false,40);
+  gap(true);
+  await out('the audio is a side effect.',true,40);
+  await out('of something larger.',true,30);
+  gap();
+  busy=false;
+  addBack(screenContact);
+}
+
+async function screenOST(){
+  busy=true;clear();
+  await cmd('ls -la /t474/ost/',20);
+  gap(true);
+  await out('<span class="hi">t474 · original soundtrack</span>');
+  await out('// the sound of something being constructed in the dark.',true,60);
+  gap(true);
+
+  const tracks = [
+    {name:'FELO DE SE',      url:'https://soundcloud.com/kader-d-garnica/felo-de-se'},
+    {name:'cellophane',      url:'https://soundcloud.com/kader-d-garnica/cellophane'},
+    {name:'D3574cam3n70',    url:'https://soundcloud.com/kader-d-garnica/d3574cam3n70'},
+  ];
+
+  await cmd('cat tracklist.txt',18);
+  for(let i=0;i<tracks.length;i++){
+    await sleep(80);
+    await out(`<span class="lo">[${String(i+1).padStart(2,'0')}]</span> ${tracks[i].name}`,false,0);
+  }
+
+  gap(true);
+  await cmd('play --embed',18);
+  await sleep(200);
+
+  // SoundCloud embed — full profile widget
+  const embedWrap = document.createElement('div');
+  embedWrap.style.cssText='width:100%;max-width:560px;margin:0.6rem 0;border:1px solid #2a4a2a;overflow:hidden;';
+  const iframe = document.createElement('iframe');
+  iframe.width='100%';
+  iframe.height='300';
+  iframe.scrolling='no';
+  iframe.frameBorder='no';
+  iframe.allow='autoplay';
+  iframe.src='https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/users/1694584550&color=%2300ff41&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true';
+  embedWrap.appendChild(iframe);
+  container.appendChild(embedWrap);
+
+  gap(true);
+  await out('// or dead. hard to tell.',true,60);
+  gap();
+  busy=false;
+  addBack(screenContact);
+}
+
+// ── Splash screen glitch ──────────────────────────────────────
+(function() {
+  const splash = document.getElementById('splash');
+  const cv = document.getElementById('splash-canvas');
+  const ctx = cv.getContext('2d');
+  const W = 240, H = 240;
+  const img = new Image();
+  img.src = 'data:image/webp;base64,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';
+
+  let t = 0, raf;
+
+  img.onload = function() {
+    // offscreen canvas — always read clean image from here
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const offCtx = off.getContext('2d');
+    offCtx.drawImage(img, 0, 0, W, H);
+
+    function glitchFrame() {
+      t++;
+
+      // 1. always start from clean image
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(off, 0, 0);
+
+      // 2. VHS color bleed — red left, cyan right
+      const bleed = 0.4 + Math.sin(t * 0.07) * 0.6;
+      if(bleed > 0.2) {
+        ctx.save();
+        ctx.globalAlpha = 0.2 * bleed;
+        ctx.globalCompositeOperation = 'screen';
+        ctx.drawImage(off, -5 * bleed, 0, W, H);
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = 0.15 * bleed;
+        ctx.globalCompositeOperation = 'screen';
+        ctx.drawImage(off, 5 * bleed, 0, W, H);
+        ctx.restore();
+      }
+
+      // 3. horizontal slice displacement — VHS style
+      if(t % 7 < 3) {
+        const slices = 2 + Math.floor(Math.random() * 6);
+        for(let i = 0; i < slices; i++) {
+          const sy = Math.floor(Math.random() * H);
+          const sh = 1 + Math.floor(Math.random() * 14);
+          const dx = (Math.random() - 0.5) * 32;
+          ctx.save();
+          ctx.drawImage(off, 0, sy, W, sh, dx, sy, W, sh);
+          ctx.restore();
+        }
+      }
+
+      // 4. scanlines
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      for(let y = 0; y < H; y += 3) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, y, W, 1);
+      }
+      ctx.restore();
+
+      // 5. VHS tracking band scrolling down
+      const trackY = ((t * 2.5) % (H + 30)) - 15;
+      ctx.save();
+      ctx.globalAlpha = 0.10;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, trackY, W, 5);
+      ctx.restore();
+
+      // 6. phosphor green tint
+      ctx.save();
+      ctx.globalAlpha = 0.07;
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = '#00ff41';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+
+      // 7. noise
+      if(t % 3 === 0) {
+        ctx.globalAlpha = 0.5;
+        for(let i = 0; i < 25; i++) {
+          ctx.fillStyle = Math.random() > 0.5 ? '#00ff41' : '#fff';
+          ctx.fillRect(Math.random()*W, Math.random()*H, 1+Math.random()*3, 1);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // 8. full frame flicker
+      if(t % 28 < 2) {
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#00ff41';
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+      }
+
+      if(t < 140) {
+        raf = requestAnimationFrame(glitchFrame);
+      } else {
+        splash.classList.add('fade-out');
+        setTimeout(() => {
+          splash.style.display = 'none';
+          main();
+        }, 650);
+      }
+    }
+    glitchFrame();
+  };
+  };
+})();
+</script>
+</body>
+</html>
