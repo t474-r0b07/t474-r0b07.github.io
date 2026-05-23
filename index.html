@@ -127,76 +127,55 @@
     }
     #splash.fade-out { opacity:0; pointer-events:none; }
 
-    /* image wrapper */
+    /* logo wrapper — responsivo */
     .splash-img-wrap {
       position:relative;
-      width:280px;
+      width: clamp(160px, 28vw, 320px);
     }
+
+    /* scanner line */
+    .splash-img-wrap::after {
+      content:'';
+      position:absolute;
+      left:0; right:0;
+      height:2px;
+      background:linear-gradient(90deg, transparent 0%, rgba(0,255,65,0.7) 40%, rgba(0,255,65,1) 50%, rgba(0,255,65,0.7) 60%, transparent 100%);
+      top: -2px;
+      animation: scanDown 2.2s cubic-bezier(0.4,0,0.6,1) 0.8s infinite;
+      pointer-events:none;
+      filter: blur(0.5px);
+    }
+    @keyframes scanDown {
+      0%   { top: 0%;   opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 0.6; }
+      100% { top: 100%; opacity: 0; }
+    }
+
     #splash-img {
       width:100%;
       display:block;
       opacity:0;
-      animation: splashFadeIn 0.6s 0.3s forwards;
+      animation: splashFadeIn 0.7s 0.2s forwards;
     }
     @keyframes splashFadeIn {
-      from{opacity:0;transform:scale(0.97);}
-      to{opacity:1;transform:scale(1);}
+      from{ opacity:0; filter:brightness(3) blur(2px); }
+      to{   opacity:1; filter:brightness(1) blur(0);   }
     }
 
-    /* glitch layers */
-    .splash-img-wrap::before,
-    .splash-img-wrap::after {
-      content:'';
-      position:absolute;
-      inset:0;
-      background:inherit;
-      pointer-events:none;
-      opacity:0;
+    /* light flicker sobre la imagen */
+    #splash-img.flicker {
+      animation: lightFlicker 0.15s steps(1) forwards;
     }
-    .glitch-active #splash-img { animation: glitchMain 0.12s steps(1) infinite; }
-    @keyframes glitchMain {
-      0%,100%{transform:translate(0,0);filter:none;opacity:1;}
-      20%{transform:translate(-3px,0);filter:hue-rotate(90deg);opacity:0.85;}
-      40%{transform:translate(3px,0);clip-path:inset(30% 0 40% 0);}
-      60%{transform:translate(0,2px);filter:hue-rotate(-90deg);opacity:0.9;}
-      80%{transform:translate(-2px,-1px);clip-path:inset(60% 0 10% 0);}
+    @keyframes lightFlicker {
+      0%  { filter:brightness(1);   opacity:1;    }
+      15% { filter:brightness(2.8); opacity:0.95; }
+      30% { filter:brightness(0.6); opacity:0.85; }
+      45% { filter:brightness(2.2); opacity:1;    }
+      60% { filter:brightness(0.8); opacity:0.9;  }
+      75% { filter:brightness(1.6); opacity:0.97; }
+      100%{ filter:brightness(1);   opacity:1;    }
     }
-
-    /* radar overlay */
-    .splash-radar {
-      position:absolute;
-      top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      width:280px; height:280px;
-      border-radius:50%;
-      pointer-events:none;
-      opacity:0;
-      animation: radarAppear 0.4s 0.8s forwards;
-    }
-    @keyframes radarAppear { to{opacity:1;} }
-
-    .splash-radar::before {
-      content:'';
-      position:absolute;
-      inset:0;
-      border-radius:50%;
-      border:1px solid rgba(0,255,65,0.25);
-      box-shadow:
-        0 0 0 40px rgba(0,255,65,0.04),
-        0 0 0 80px rgba(0,255,65,0.03),
-        0 0 0 120px rgba(0,255,65,0.02);
-    }
-    .splash-radar::after {
-      content:'';
-      position:absolute;
-      top:0; left:50%;
-      width:50%; height:50%;
-      transform-origin:0% 100%;
-      background:conic-gradient(from 0deg, rgba(0,255,65,0) 0%, rgba(0,255,65,0.18) 20%, rgba(0,255,65,0) 21%);
-      animation: radarSpin 2.5s linear infinite;
-      border-radius:0 100% 0 0;
-    }
-    @keyframes radarSpin { to{transform:rotate(360deg);} }
 
     #splash-label {
       font-family:'Share Tech Mono',monospace;
@@ -274,8 +253,7 @@
 
 <div id="splash">
   <div class="splash-img-wrap" id="splash-wrap">
-    <img id="splash-img" src="splash.jpg" alt="">
-    <div class="splash-radar"></div>
+    <img id="splash-img" src="assets/t474_r0b07_logo.png" alt="t474_r0b07">
   </div>
   <div id="splash-label">// initializing.cc</div>
 </div>
@@ -288,6 +266,7 @@
 <script src="js/screen-progress.js"></script>
 <script src="js/screen-lore.js"></script>
 <script src="js/screen-contact.js"></script>
+<script src="js/screen-git4dummies.js"></script>
 <script src="js/splash.js"></script>
 
 </body>
