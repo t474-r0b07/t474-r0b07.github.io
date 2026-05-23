@@ -96,7 +96,7 @@ async function screenLoreEntry(title){
     await out('Estaba ahí desde 1989. En producción. En millones de servidores.',true,80);
     gap(true);
     await cmd('echo $CONTEXT',18);
-    await out('env x='() { :;}; echo vulnerable' bash -c "test". Así de simple. Así de devastador.',false,40);
+    await out('env x=&#39;() { :;}; echo vulnerable&#39; bash -c &quot;test&quot;. Así de simple. Así de devastador.',false,40);
     gap(true);
     const {cv,btn}=makeCanvas(560,200);
     animShellshock(cv,btn);
