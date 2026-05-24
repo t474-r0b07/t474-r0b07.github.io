@@ -312,266 +312,444 @@ function animJerrySaltzer(cv, btn){
 }
 
 
-// ── Aleph One: stack smashing — buffer overflow visualization ─
+// ── Aleph One: book flies and hits heads ─────────────────────
 function animAlephOne(cv, btn){
   const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
-  let t=0,raf=null,phase='fill',overflowT=0,fadeAlpha=0;
-  const BUFFER_SIZE=8;
-  const cells=Array(BUFFER_SIZE+4).fill('__');
-  const labels=['buf[0]','buf[1]','buf[2]','buf[3]','buf[4]','buf[5]','buf[6]','buf[7]','saved_ebp','ret_addr','[above]','[above]'];
-  const INPUT='AAAAAAAA\x41\x41\x41\x41';
-  let fillIdx=0;
-  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='fill';overflowT=0;fadeAlpha=0;fillIdx=0;for(let i=0;i<cells.length;i++)cells[i]='__';btn.classList.remove('visible');tick();};
+  let t=0,raf=null;
+  // heads: {x,y,hit,hitT,bounce}
+  const heads=[
+    {x:60,y:GH-28,hit:false,hitT:0,bounce:0},
+    {x:110,y:GH-28,hit:false,hitT:0,bounce:0},
+    {x:160,y:GH-28,hit:false,hitT:0,bounce:0},
+    {x:210,y:GH-28,hit:false,hitT:0,bounce:0},
+    {x:260,y:GH-28,hit:false,hitT:0,bounce:0},
+  ];
+  // book projectile
+  let book={x:8,y:GH-50,vx:1.8,vy:-2.2,angle:0,bounces:0};
+  let done=false;
+
+  btn.onclick=()=>{
+    cancelAnimationFrame(raf);t=0;done=false;
+    book={x:8,y:GH-50,vx:1.8,vy:-2.2,angle:0,bounces:0};
+    heads.forEach(h=>{h.hit=false;h.hitT=0;h.bounce=0;});
+    btn.classList.remove('visible');tick();
+  };
+
   function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+
+  function drawHand(x,y){
+    // arm
+    px(x,y,C.bright,3,8);
+    // hand
+    px(x-1,y-2,C.bright,5,4);
+    // fingers
+    px(x-1,y-4,C.bright,1,3);
+    px(x+1,y-4,C.bright,1,3);
+    px(x+3,y-4,C.bright,1,3);
+  }
+
+  function drawBook(x,y,angle){
+    const bx=Math.round(x);
+    const by=Math.round(y);
+    // book body
+    ctx.save();
+    ctx.translate(bx*SC,by*SC);
+    ctx.rotate(angle);
+    ctx.fillStyle=C.glow;
+    ctx.fillRect(-7*SC,-5*SC,14*SC,10*SC);
+    ctx.fillStyle=C.bright;
+    ctx.fillRect(-6*SC,-4*SC,2*SC,8*SC);
+    // pages lines
+    ctx.fillStyle=C.black;
+    for(let i=0;i<3;i++)ctx.fillRect(-2*SC,(-3+i*3)*SC,8*SC,SC);
+    ctx.restore();
+  }
+
+  function drawHead(hd){
+    const x=hd.x;
+    const y=hd.y-hd.bounce;
+    const col=hd.hit?C.glow:C.mid;
+    // head circle pixel art
+    px(x-3,y-8,col,6,2);
+    px(x-4,y-6,col,8,5);
+    px(x-3,y-1,col,6,2);
+    // eyes
+    if(!hd.hit){
+      px(x-2,y-5,C.black,2,2);
+      px(x+1,y-5,C.black,2,2);
+    } else {
+      // X eyes when hit
+      px(x-2,y-5,C.black); px(x-1,y-4,C.black);
+      px(x+2,y-5,C.black); px(x+1,y-4,C.black);
+    }
+    // body
+    px(x-2,y+1,C.mid,4,6);
+    // stars if hit
+    if(hd.hit&&hd.hitT<30){
+      const s=Math.floor(hd.hitT/5)%2;
+      if(s===0){
+        px(x-5,y-10,C.glow,2,2);
+        px(x+4,y-10,C.glow,2,2);
+      }
+    }
+  }
+
   function tick(){
     t++;
     ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
-    const cellW=18,cellH=14,cols=BUFFER_SIZE+4;
-    const startX=(GW-(cols*(cellW+2)))/2;
-    const rowY=GH/2-4;
+
+    // ground
+    for(let x=0;x<GW;x++)px(x,GH-8,C.mid);
 
     // title
     ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
-    ctx.fillText('stack frame',GW/2*SC,9*SC);
+    ctx.fillText('Phrack #49',GW/2*SC,9*SC);
 
-    // fill buffer every 8 frames
-    if(phase==='fill'&&t%8===0&&fillIdx<INPUT.length){
-      cells[fillIdx]='41';
-      fillIdx++;
-      if(fillIdx>=BUFFER_SIZE)phase='overflow';
-    }
-    if(phase==='overflow'){
-      overflowT++;
-      if(overflowT%10===0&&fillIdx<cells.length){
-        cells[fillIdx]='41';
-        fillIdx++;
+    // hand at left throwing
+    drawHand(4,GH-55);
+
+    // move book
+    if(!done){
+      book.x+=book.vx;
+      book.y+=book.vy;
+      book.vy+=0.12; // gravity
+      book.angle+=0.08;
+
+      // bounce on ground
+      if(book.y>GH-22){
+        book.y=GH-22;
+        book.vy*=-0.6;
+        book.vx*=0.95;
+        book.bounces++;
       }
-      if(fillIdx>=cells.length)phase='done';
+
+      // check hit on heads
+      heads.forEach(h=>{
+        if(!h.hit&&Math.abs(book.x-h.x)<10&&Math.abs(book.y-h.y)<12){
+          h.hit=true;
+          book.vy=-1.5;
+          book.vx+=0.3;
+        }
+      });
+
+      if(book.bounces>4&&book.x>GW)done=true;
     }
 
-    // draw cells
-    for(let i=0;i<cells.length;i++){
-      const x=startX+i*(cellW+2);
-      const isBuffer=i<BUFFER_SIZE;
-      const isOverflow=i>=BUFFER_SIZE&&cells[i]!='__';
-      const col=isOverflow?C.glow:isBuffer&&cells[i]!='__'?C.bright:C.mid;
-      ctx.strokeStyle=isOverflow?C.glow:C.mid;ctx.lineWidth=1;
-      ctx.strokeRect(x*SC,rowY*SC,cellW*SC,cellH*SC);
-      if(isOverflow){
-        ctx.fillStyle='rgba(0,255,65,0.15)';
-        ctx.fillRect(x*SC,rowY*SC,cellW*SC,cellH*SC);
+    // update hit heads
+    heads.forEach(h=>{
+      if(h.hit){
+        h.hitT++;
+        h.bounce=Math.max(0,Math.sin(h.hitT*0.3)*6*(1-h.hitT/40));
       }
-      ctx.fillStyle=col;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-      ctx.fillText(cells[i],(x+cellW/2)*SC,(rowY+cellH*0.75)*SC);
-      // label below
-      ctx.fillStyle=i>=BUFFER_SIZE?C.glow:C.mid;ctx.font=`${SC*2}px monospace`;
-      ctx.fillText(labels[i],(x+cellW/2)*SC,(rowY+cellH+6)*SC);
+    });
+
+    // draw heads
+    heads.forEach(h=>drawHead(h));
+
+    // draw book
+    drawBook(book.x,book.y,book.angle);
+
+    // knowledge spreading label
+    const hitCount=heads.filter(h=>h.hit).length;
+    if(hitCount>0){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText(`minds reached: ${hitCount}`,GW/2*SC,18*SC);
     }
 
-    // arrow input
-    ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
-    ctx.fillText('input →',(startX-22)*SC,(rowY+cellH*0.7)*SC);
-
-    // overflow warning
-    if(phase==='overflow'||phase==='done'){
-      const alpha=Math.min(1,overflowT/20);
-      ctx.globalAlpha=alpha;
-      ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
-      ctx.fillText('OVERFLOW — ret_addr corrupted',GW/2*SC,16*SC);
-      ctx.globalAlpha=1;
-    }
-
-    // bottom label
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-    ctx.fillText('Aleph One — Phrack #49 — 1996',(GW/2)*SC,(GH-5)*SC);
+    ctx.fillText('Aleph One — 1996 — knowledge that cannot be unlearned',(GW/2)*SC,(GH-3)*SC);
 
-    if(phase==='done'){
-      fadeAlpha=Math.min(1,fadeAlpha+0.01);
-      if(fadeAlpha>0.5)btn.classList.add('visible');
-      if(fadeAlpha<1)raf=requestAnimationFrame(tick);
-      return;
-    }
+    if(done)btn.classList.add('visible');
     raf=requestAnimationFrame(tick);
   }
   tick();
 }
 
-// ── Morris Worm: self-replication across nodes ────────────────
+// ── Morris Worm: apples getting infected by worms ─────────────
 function animMorrisWorm(cv, btn){
   const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
   let t=0,raf=null;
-  // nodes: {x,y,infected,infectedT,connections:[idx]}
-  const nodes=[
-    {x:GW/2,   y:GH/2,   infected:true, infectedT:0, connections:[1,2,3]},
-    {x:GW/2-40,y:GH/2-25,infected:false,infectedT:0, connections:[0,4,5]},
-    {x:GW/2+40,y:GH/2-25,infected:false,infectedT:0, connections:[0,5,6]},
-    {x:GW/2,   y:GH/2+30,infected:false,infectedT:0, connections:[0,4,6]},
-    {x:GW/2-60,y:GH/2+10,infected:false,infectedT:0, connections:[1,3]},
-    {x:GW/2+10,y:GH/2-40,infected:false,infectedT:0, connections:[1,2]},
-    {x:GW/2+60,y:GH/2+10,infected:false,infectedT:0, connections:[2,3]},
+
+  const apples=[
+    {x:40, y:GH/2,infected:true, infectedT:0,rot:0,worms:[]},
+    {x:100,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
+    {x:160,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
+    {x:220,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
+    {x:280,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
   ];
-  let packets=[];
-  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;nodes.forEach((n,i)=>{n.infected=i===0;n.infectedT=0;});packets=[];btn.classList.remove('visible');tick();};
+
+  // traveling worms between apples
+  let travelers=[];
+
+  btn.onclick=()=>{
+    cancelAnimationFrame(raf);t=0;travelers=[];
+    apples.forEach((a,i)=>{a.infected=i===0;a.infectedT=0;a.rot=0;a.worms=[];});
+    btn.classList.remove('visible');tick();
+  };
+
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+
+  function drawApple(a){
+    const x=a.x; const y=a.y;
+    const rot=Math.min(1,a.rot);
+    const bodyCol=a.infected?(rot>0.5?C.dark:'#2a6b2a'):(C.bright);
+    const spotCol=a.infected?C.mid:C.dark;
+
+    // stem
+    px(x,y-10,C.mid,1,3);
+    px(x+1,y-10,C.mid,1,2);
+    // leaf
+    px(x+2,y-10,C.bright,3,2);
+
+    // apple body
+    px(x-5,y-7,bodyCol,10,2);
+    px(x-7,y-5,bodyCol,14,8);
+    px(x-5,y+3,bodyCol,10,2);
+
+    // rot spots
+    if(rot>0.3){
+      px(x-2,y-3,spotCol,3,3);
+      px(x+2,y,spotCol,2,2);
+    }
+    if(rot>0.7){
+      px(x-4,y-1,spotCol,2,2);
+      px(x+1,y-5,spotCol,3,3);
+    }
+
+    // worms inside
+    a.worms.forEach((w,i)=>{
+      const wx=x-3+Math.sin(t*0.1+i*2)*5;
+      const wy=y-2+Math.cos(t*0.08+i)*3;
+      px(wx,wy,C.glow,2,1);
+      px(wx+2,wy,C.glow,1,1);
+    });
+  }
+
   function tick(){
     t++;
     ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
 
-    // spread every 60 frames
-    if(t%60===0){
-      nodes.forEach(n=>{
-        if(n.infected){
-          n.connections.forEach(ci=>{
-            if(!nodes[ci].infected){
-              packets.push({sx:n.x,sy:n.y,tx:nodes[ci].x,ty:nodes[ci].y,progress:0,target:ci});
-            }
+    // ground
+    for(let x=0;x<GW;x++)px(x,GH-8,C.dark);
+
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('internet — 1988',GW/2*SC,9*SC);
+
+    // spread worms every 90 frames
+    if(t%90===0){
+      apples.forEach((a,i)=>{
+        if(a.infected&&i+1<apples.length&&!apples[i+1].infected){
+          travelers.push({
+            sx:a.x,sy:a.y,
+            tx:apples[i+1].x,ty:apples[i+1].y,
+            progress:0,target:i+1,
+            wy:0
           });
         }
       });
     }
 
-    // move packets
-    packets.forEach(p=>{
-      p.progress=Math.min(1,p.progress+0.02);
-      if(p.progress>=1)nodes[p.target].infected=true;
+    // move travelers
+    travelers.forEach(w=>{
+      w.progress=Math.min(1,w.progress+0.015);
+      w.wy=Math.sin(w.progress*Math.PI)*-15;
+      if(w.progress>=1){
+        const a=apples[w.target];
+        a.infected=true;
+        a.worms.push({});
+      }
     });
-    packets=packets.filter(p=>p.progress<1);
+    travelers=travelers.filter(w=>w.progress<1);
 
-    // draw connections
-    nodes.forEach(n=>{
-      n.connections.forEach(ci=>{
-        const n2=nodes[ci];
-        ctx.strokeStyle=C.dark||'#0a1f0a';ctx.lineWidth=1;
-        ctx.beginPath();ctx.moveTo(n.x*SC,n.y*SC);ctx.lineTo(n2.x*SC,n2.y*SC);ctx.stroke();
-      });
-    });
-
-    // draw packets
-    packets.forEach(p=>{
-      const x=p.sx+(p.tx-p.sx)*p.progress;
-      const y=p.sy+(p.ty-p.sy)*p.progress;
-      ctx.fillStyle=C.glow;
-      ctx.beginPath();ctx.arc(x*SC,y*SC,SC*2,0,Math.PI*2);ctx.fill();
-    });
-
-    // draw nodes
-    nodes.forEach((n,i)=>{
-      if(n.infected)n.infectedT++;
-      const pulse=n.infected?Math.sin(t*0.1+i)*1.5:0;
-      const r=4+pulse;
-      ctx.fillStyle=n.infected?C.glow:C.mid;
-      ctx.beginPath();ctx.arc(n.x*SC,n.y*SC,r*SC,0,Math.PI*2);ctx.fill();
-      if(n.infected){
-        ctx.strokeStyle=`rgba(0,255,65,${0.2+Math.sin(t*0.1+i)*0.1})`;
-        ctx.lineWidth=SC;
-        ctx.beginPath();ctx.arc(n.x*SC,n.y*SC,(r+4)*SC,0,Math.PI*2);ctx.stroke();
+    // update infected apples
+    apples.forEach(a=>{
+      if(a.infected){
+        a.infectedT++;
+        a.rot=Math.min(1,a.infectedT/120);
+        if(a.worms.length<3&&a.infectedT%30===0)a.worms.push({});
       }
     });
 
+    // draw connection lines
+    for(let i=0;i<apples.length-1;i++){
+      ctx.strokeStyle=C.dark;ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(apples[i].x*SC,(apples[i].y+5)*SC);
+      ctx.lineTo(apples[i+1].x*SC,(apples[i+1].y+5)*SC);
+      ctx.stroke();
+    }
+
+    // draw travelers
+    travelers.forEach(w=>{
+      const x=w.sx+(w.tx-w.sx)*w.progress;
+      const y=w.sy+w.wy;
+      ctx.fillStyle=C.glow;
+      // pixel worm shape
+      ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,4*SC,2*SC);
+      ctx.fillRect((Math.round(x)+2)*SC,(Math.round(y)-1)*SC,2*SC,SC);
+    });
+
+    // draw apples
+    apples.forEach(a=>drawApple(a));
+
     // infected count
-    const infectedCount=nodes.filter(n=>n.infected).length;
-    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
-    ctx.fillText(`infected: ${infectedCount}/${nodes.length}`,4*SC,10*SC);
+    const infectedCount=apples.filter(a=>a.infected).length;
+    ctx.fillStyle=infectedCount===apples.length?C.glow:C.mid;
+    ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText(`infected: ${infectedCount}/${apples.length}`,GW/2*SC,18*SC);
 
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-    ctx.fillText('Morris Worm — 02.11.1988 — 6000 machines in 24h',(GW/2)*SC,(GH-5)*SC);
+    ctx.fillText('Morris Worm — 6000 machines in 24h',(GW/2)*SC,(GH-3)*SC);
 
-    if(infectedCount===nodes.length&&t>120)btn.classList.add('visible');
+    if(infectedCount===apples.length&&t>200)btn.classList.add('visible');
     raf=requestAnimationFrame(tick);
   }
   tick();
 }
 
-// ── Shellshock: env variable injecting code ───────────────────
+// ── Shellshock: thief enters through unguarded window ─────────
 function animShellshock(cv, btn){
   const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
-  let t=0,raf=null,phase='type',charIdx=0,executeT=0,fadeAlpha=0;
-  const PAYLOAD="env x='() { :;}; echo PWNED'";
-  const RESULT='PWNED';
-  let resultAlpha=0,shellAlpha=0;
-  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='type';charIdx=0;executeT=0;fadeAlpha=0;resultAlpha=0;shellAlpha=0;btn.classList.remove('visible');tick();};
+  let t=0,raf=null,phase='queue',thiefX=0,thiefY=0,thiefIn=false,doneT=0;
+
+  // queue people waiting at door
+  const people=[];
+  for(let i=0;i<5;i++)people.push({x:GW-30-i*14,y:GH-20,look:i%2===0});
+
+  const DOOR_X=GW-18;
+  const WINDOW_X=25;
+  const WALL_Y=GH-40;
+
+  btn.onclick=()=>{
+    cancelAnimationFrame(raf);t=0;phase='queue';thiefX=4;thiefY=GH-20;thiefIn=false;doneT=0;
+    btn.classList.remove('visible');tick();
+  };
+
+  thiefX=4; thiefY=GH-20;
+
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+
+  function drawWall(){
+    // wall
+    for(let x=10;x<GW-10;x++)px(x,WALL_Y,C.mid,1,2);
+    for(let y=WALL_Y;y<GH-8;y++){px(10,y,C.mid);px(GW-10,y,C.mid);}
+    // ground
+    for(let x=0;x<GW;x++)px(x,GH-8,C.mid);
+
+    // door with lock
+    px(DOOR_X-6,WALL_Y,C.dark,12,30);
+    px(DOOR_X-5,WALL_Y+1,C.mid,10,28);
+    // lock
+    px(DOOR_X-2,WALL_Y+12,C.glow,4,4);
+    px(DOOR_X-1,WALL_Y+10,C.glow,2,3);
+
+    // window (small, left side — unnoticed)
+    px(WINDOW_X-4,WALL_Y+2,C.dark,10,12);
+    px(WINDOW_X-3,WALL_Y+3,C.mid,8,10);
+    // window frame
+    ctx.strokeStyle=C.mid;ctx.lineWidth=SC;
+    ctx.strokeRect((WINDOW_X-4)*SC,(WALL_Y+2)*SC,10*SC,12*SC);
+    // small label
+    ctx.fillStyle=C.dark;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
+    ctx.fillText('env',(WINDOW_X)*SC,(WALL_Y+18)*SC);
+  }
+
+  function drawPerson(x,y,isThief){
+    if(isThief){
+      // striped shirt
+      px(x-2,y-5,C.bright,4,5);
+      px(x-2,y-4,C.mid,4,1);
+      px(x-2,y-2,C.mid,4,1);
+      // mask/antifaz
+      px(x-2,y-8,C.bright,4,3);
+      px(x-2,y-7,C.black,4,2);
+      // head
+      px(x-1,y-10,C.bright,2,3);
+      // legs
+      px(x-2,y,C.mid,2,4);
+      px(x+1,y,C.mid,2,4);
+    } else {
+      // regular person
+      px(x-1,y-10,C.mid,2,3);
+      px(x-2,y-7,C.mid,4,5);
+      px(x-1,y,C.mid,2,4);
+    }
+  }
+
   function tick(){
     t++;
     ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
 
-    // prompt line
-    ctx.fillStyle=C.mid;ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
-    ctx.fillText('$',(4)*SC,(GH/2-14)*SC);
+    // title
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('CVE-2014-6271',GW/2*SC,9*SC);
 
-    // type payload
-    if(phase==='type'&&t%3===0&&charIdx<PAYLOAD.length){
-      charIdx++;
-      if(charIdx>=PAYLOAD.length)phase='execute';
+    drawWall();
+
+    // queue people at door
+    people.forEach(p=>{
+      drawPerson(p.x,p.y,false);
+      // looking at lock
+      ctx.fillStyle=C.mid;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
+      if(t%60<30)ctx.fillText('?',p.x*SC,(p.y-14)*SC);
+    });
+
+    // lock attention arrows
+    if(t%40<20){
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('↑ LOCK',(DOOR_X-2)*SC,(WALL_Y-4)*SC);
     }
 
-    const displayed=PAYLOAD.slice(0,charIdx);
-    // color code the payload
-    const envPart='env x=';
-    const funcPart="'() { :;}'";
-    const injectPart='; echo PWNED';
-
-    ctx.fillStyle=C.bright;ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
-    let cx=12;
-    // draw char by char with color coding
-    const colorMap=[];
-    for(let i=0;i<PAYLOAD.length;i++){
-      if(i<6)colorMap.push(C.mid);           // env x=
-      else if(i<16)colorMap.push(C.bright);  // () { :;}
-      else colorMap.push(C.glow);            // ; echo PWNED
+    // thief logic
+    if(phase==='queue'&&t>60){
+      phase='approach';
     }
-    for(let i=0;i<displayed.length;i++){
-      ctx.fillStyle=colorMap[i];
-      ctx.fillText(PAYLOAD[i],(4+cx)*SC,(GH/2-14)*SC);
-      cx+=5;
-    }
-    // cursor
-    if(phase==='type'){
-      ctx.fillStyle=Math.floor(t/15)%2===0?C.glow:'transparent';
-      ctx.fillRect((4+cx)*SC,(GH/2-18)*SC,4*SC,8*SC);
-    }
-
-    // execute phase
-    if(phase==='execute'||phase==='done'){
-      executeT++;
-      // bash processes it
-      shellAlpha=Math.min(1,executeT/20);
-      ctx.globalAlpha=shellAlpha;
-      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
-      ctx.fillText('bash -c "test"',(4)*SC,(GH/2+2)*SC);
-      ctx.globalAlpha=1;
-
-      // function definition smuggled in env var
-      if(executeT>20){
-        const a=Math.min(1,(executeT-20)/20);
-        ctx.globalAlpha=a;
-        ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;
-        ctx.fillText('→ bash parses env var',(4)*SC,(GH/2+12)*SC);
-        ctx.fillText('→ executes trailing code',(4)*SC,(GH/2+20)*SC);
-        ctx.globalAlpha=1;
+    if(phase==='approach'){
+      // thief walks toward window
+      if(thiefX<WINDOW_X-6){
+        thiefX+=0.8;
+      } else {
+        phase='climb';
       }
-
-      // PWNED
-      if(executeT>50){
-        resultAlpha=Math.min(1,(executeT-50)/20);
-        ctx.globalAlpha=resultAlpha;
-        ctx.fillStyle=C.glow;ctx.font=`${SC*7}px monospace`;ctx.textAlign='center';
-        const shake=executeT<70?(Math.random()-.5)*3:0;
-        ctx.fillText(RESULT,(GW/2+shake)*SC,(GH/2+36)*SC);
-        ctx.globalAlpha=1;
-        if(executeT>70)phase='done';
+    }
+    if(phase==='climb'){
+      // thief climbs through window
+      if(thiefY>WALL_Y+5){
+        thiefY-=0.8;
+        thiefX=WINDOW_X-2;
+      } else {
+        phase='inside';
+        thiefX=WINDOW_X+8;
+      }
+    }
+    if(phase==='inside'){
+      // thief inside, walks around
+      if(thiefX<GW-25){
+        thiefX+=0.6;
+      } else {
+        doneT++;
+        if(doneT>60)phase='done';
       }
     }
 
-    // CVE label
+    // draw thief
+    if(phase!=='queue')drawPerson(thiefX,thiefY,true);
+
+    // inside message
+    if(phase==='inside'||phase==='done'){
+      ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+      const shake=phase==='inside'&&doneT<20?(Math.random()-.5)*2:0;
+      ctx.fillText('INSIDE',(GW/2+shake)*SC,(WALL_Y-6)*SC);
+    }
+
+    // year label
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-    ctx.fillText('CVE-2014-6271 — 25 years in bash before discovery',(GW/2)*SC,(GH-5)*SC);
+    ctx.fillText('25 years. nobody checked the window.',(GW/2)*SC,(GH-3)*SC);
 
-    if(phase==='done'){
-      fadeAlpha=Math.min(1,fadeAlpha+0.008);
-      if(fadeAlpha>0.5)btn.classList.add('visible');
-    }
+    if(phase==='done')btn.classList.add('visible');
     raf=requestAnimationFrame(tick);
   }
   tick();
