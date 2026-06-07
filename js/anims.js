@@ -1,3 +1,6 @@
+// ══════════════════════════════════════════════════════════════
+// ANIMATIONS — t474-r0b07
+// ══════════════════════════════════════════════════════════════
 
 // ── Ariane 5: rocket launch & explosion ──────────────────────
 function animAriane5(cv, btn){
@@ -15,9 +18,7 @@ function animAriane5(cv, btn){
     if(phase==='launch'&&launched){shakeX=((Math.random()-.5)*3)|0;shakeY=((Math.random()-.5)*2)|0;}
     else if(phase==='explode'&&explodeT<20){const sf=Math.max(0,1-explodeT/20)*4;shakeX=((Math.random()-.5)*sf)|0;shakeY=((Math.random()-.5)*sf)|0;}
     else{shakeX=0;shakeY=0;}
-    // stars
     for(const s of stars){const b=Math.sin(t*0.05+s.blink);if(b>0.3)px(s.x,s.y,b>0.8?C.glow:C.mid,s.sz);}
-    // trees
     const rows=[3,5,7,5,7,5,3];
     function drawTree(x,y,h){for(let i=0;i<Math.min(rows.length,h);i++){const w=rows[i];for(let j=0;j<w;j++){const lx=x+j-Math.floor(w/2);px(lx,y-i,(i===0||j===0||j===w-1)?C.mid:C.bright);}}}
     function drawGround(gy){for(let xx=0;xx<GW;xx++){px(xx,gy,C.mid);px(xx,gy+1,C.dark);}for(let xx=-9;xx<=9;xx++)px(CX+xx,gy-1,C.mid);}
@@ -39,7 +40,6 @@ function animAriane5(cv, btn){
       } else {
         const spd=Math.max(.3,.3+(GY-15-rocketY)*.012); rocketY-=spd;
         const ry=Math.floor(rocketY);
-        // smoke
         if(t%2===0)smoke.push({x:CX+(Math.random()-.5)*4,y:ry+15,vy:.1+Math.random()*.2,vx:(Math.random()-.5)*.3,life:1,r:1+Math.floor(Math.random()*3)});
         for(const s of smoke){s.x+=s.vx;s.y+=s.vy;s.life-=.02;s.r+=.05;}
         smoke=smoke.filter(s=>s.life>0);
@@ -77,80 +77,44 @@ function animAriane5(cv, btn){
 function animDannyCohen(cv, btn){
   const W=560,H=180,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
-  let t=0,raf=null,phase='fight',endT=0,fadeAlpha=0;
-  const BYTES=['01','00','00','04'];
-  const BIG=[[...BYTES]]; // big-endian order
-  const LIT=[[...BYTES].reverse()]; // little-endian order
+  let t=0,raf=null;
   function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
-  function drawByte(x,y,val,col){
-    ctx.fillStyle=col;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
-    ctx.fillText(val,Math.round(x)*SC,Math.round(y+5)*SC);
-  }
-  function drawArrow(x1,y,x2,col){
-    ctx.fillStyle=col;
-    const dir=x2>x1?1:-1;
-    for(let i=0;i<Math.abs(x2-x1);i+=2)px(x1+i*dir,y,col);
-    px(x2,y,col); px(x2-dir,y-1,col); px(x2-dir,y+1,col);
-  }
-  function reset(){t=0;phase='fight';endT=0;fadeAlpha=0;btn.classList.remove('visible');}
-  btn.onclick=()=>{cancelAnimationFrame(raf);reset();tick();};
+  function drawByte(x,y,val,col){ctx.fillStyle=col;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';ctx.fillText(val,Math.round(x)*SC,Math.round(y+5)*SC);}
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;tick();};
   function tick(){
     t++;
     ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
     const cy=GH/2;
-    // labels
-    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
-    ctx.fillStyle=C.bright;
+    const bytesBig=['00','00','04','01'];
+    const bytesLit=['01','04','00','00'];
+    const spacing=14;
+    const startX=GW/2-spacing*1.5;
+    ctx.fillStyle=C.bright;ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
     ctx.fillText('BIG-ENDIAN',4*SC,10*SC);
     ctx.fillStyle=C.mid;
     ctx.fillText('LITTLE-ENDIAN',4*SC,(cy+14)*SC);
-
-    // value being "stored"
-    const val32='0x00000401';
     ctx.fillStyle=C.glow;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
-    ctx.fillText(val32,GW/2*SC,8*SC);
-
-    // animate bytes marching
-    const bytesBig =['00','00','04','01'];
-    const bytesLit =['01','04','00','00'];
-    const spacing=14;
-    const startX=GW/2-spacing*1.5;
-
+    ctx.fillText('0x00000401',GW/2*SC,8*SC);
     for(let i=0;i<4;i++){
       const offset=Math.sin(t*0.05+i)*1.5;
-      // big endian row — bytes flow left to right in natural order
       const bx=startX+i*spacing;
       const pulse=Math.sin(t*0.08+i*0.8)>0.5;
       drawByte(bx,cy-18+offset,bytesBig[i],pulse?C.white:C.bright);
-      // box
       ctx.strokeStyle=C.mid;ctx.lineWidth=1;
       ctx.strokeRect((bx-5)*SC,(cy-24)*SC,10*SC,10*SC);
-
-      // little endian row — reversed
       const lx=startX+i*spacing;
       const pulse2=Math.sin(t*0.08+(3-i)*0.8)>0.5;
       drawByte(lx,cy+6+offset,bytesLit[i],pulse2?C.glow:C.mid);
-      ctx.strokeStyle=C.dark||'#0a1f0a';ctx.lineWidth=1;
+      ctx.strokeStyle=C.dark;ctx.lineWidth=1;
       ctx.strokeRect((lx-5)*SC,(cy)*SC,10*SC,10*SC);
     }
-
-    // collision sparks in middle
     const sparkX=GW/2+Math.sin(t*0.3)*3;
     const sparkY=cy-6;
-    if(t%3===0){
-      for(let i=0;i<3;i++){
-        const sx=sparkX+(Math.random()-.5)*8;
-        const sy=sparkY+(Math.random()-.5)*4;
-        px(sx,sy,Math.random()>0.5?C.glow:C.white);
-      }
-    }
+    if(t%3===0){for(let i=0;i<3;i++){const sx=sparkX+(Math.random()-.5)*8;const sy=sparkY+(Math.random()-.5)*4;px(sx,sy,Math.random()>0.5?C.glow:C.white);}}
     ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
     ctx.fillText('← conflict →',GW/2*SC,(cy-8)*SC);
-
-    // label at bottom
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
     ctx.fillText('"On Holy Wars and a Plea for Peace" — Danny Cohen, 1980',GW/2*SC,(GH-5)*SC);
-
     raf=requestAnimationFrame(tick);
   }
   tick();
@@ -162,8 +126,8 @@ function animLittleEndian(cv, btn){
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
   let t=0,raf=null;
   const addresses=['0x00','0x01','0x02','0x03'];
-  const valBig=['00','00','00','01']; // big: most significant first
-  const valLit=['01','00','00','00']; // little: least significant first
+  const valBig=['00','00','00','01'];
+  const valLit=['01','00','00','00'];
   btn.onclick=()=>{cancelAnimationFrame(raf);t=0;tick();};
   function tick(){
     t++;
@@ -171,23 +135,17 @@ function animLittleEndian(cv, btn){
     const cols=4,cellW=22,cellH=16;
     const startX=(GW-(cols*cellW+cols*4))/2;
     const rowBig=GH/2-18,rowLit=GH/2+8;
-    const progress=Math.min(1,t/80); // 0→1 over 80 frames
-
+    const progress=Math.min(1,t/80);
     ctx.fillStyle=C.glow;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
     ctx.fillText('0x00000001',GW/2*SC,9*SC);
-
     ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
     ctx.fillText('big-endian    (natural order):',startX*SC,rowBig*SC-6*SC);
     ctx.fillStyle=C.mid;
     ctx.fillText('little-endian (memory order): ',startX*SC,rowLit*SC-6*SC);
-
     for(let i=0;i<4;i++){
       const x=startX+i*(cellW+4);
-      // address
       ctx.fillStyle=C.dim||'#2a4a2a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
       ctx.fillText(addresses[i],(x+cellW/2)*SC,(rowBig-8)*SC);
-
-      // big endian cell
       ctx.strokeStyle=C.mid;ctx.lineWidth=1;
       ctx.strokeRect(x*SC,rowBig*SC,cellW*SC,cellH*SC);
       const bigAlpha=Math.max(0,progress*2-i*0.4);
@@ -195,8 +153,6 @@ function animLittleEndian(cv, btn){
       ctx.fillStyle=C.bright;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
       ctx.fillText(valBig[i],(x+cellW/2)*SC,(rowBig+cellH*0.7)*SC);
       ctx.globalAlpha=1;
-
-      // little endian cell — bytes appear in reverse
       ctx.strokeStyle=C.glow;ctx.lineWidth=1;
       ctx.strokeRect(x*SC,rowLit*SC,cellW*SC,cellH*SC);
       const litAlpha=Math.max(0,progress*2-(3-i)*0.4);
@@ -205,8 +161,6 @@ function animLittleEndian(cv, btn){
       ctx.fillText(valLit[i],(x+cellW/2)*SC,(rowLit+cellH*0.7)*SC);
       ctx.globalAlpha=1;
     }
-
-    // arrow showing reversal
     if(progress>0.7){
       const alpha=(progress-0.7)/0.3;
       ctx.globalAlpha=alpha;
@@ -219,10 +173,8 @@ function animLittleEndian(cv, btn){
       ctx.fillText('reversed in memory',GW/2*SC,(rowBig+cellH+10)*SC);
       ctx.globalAlpha=1;
     }
-
-    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
     ctx.fillText('x86 · ARM · most modern CPUs store this way',(GW/2)*SC,(GH-5)*SC);
-
     if(t<240)raf=requestAnimationFrame(tick);
     else btn.classList.add('visible');
   }
@@ -234,14 +186,11 @@ function animJerrySaltzer(cv, btn){
   const W=560,H=180,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
   let t=0,raf=null;
-  const targetHex='DEADBEEF';
   const rows=6,cols=8;
   const cellW=10,cellH=10;
   const startX=(GW-(cols*cellW+cols*2))/2;
   const startY=12;
-  // random hex grid
   let grid=Array.from({length:rows},()=>Array.from({length:cols},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase()));
-  // place DEADBEEF in row 3, cols 0-3 (each byte = 2 hex chars, we show as single cells)
   const deadRow=3,deadCol=2;
   const deadBytes=['DE','AD','BE','EF'];
   let revealT=0;
@@ -249,980 +198,871 @@ function animJerrySaltzer(cv, btn){
   function tick(){
     t++;
     ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
-
-    // title
     ctx.fillStyle=C.glow;ctx.font=`${SC*5}px monospace`;ctx.textAlign='center';
     const glitch=t>60&&t%40<3;
     ctx.fillText(glitch?'0xDE??BEEF':'0xDEADBEEF',GW/2*SC,9*SC);
-
-    // randomize non-dead cells slowly
-    if(t%8===0){
-      for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-        const isDead=r===deadRow&&c>=deadCol&&c<deadCol+4;
-        if(!isDead)grid[r][c]=Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase();
-      }
-    }
-
-    // reveal DEADBEEF after t=60
-    if(t>60){
-      revealT++;
-      const byteIdx=Math.floor(revealT/20);
-      for(let i=0;i<=Math.min(byteIdx,3);i++){
-        grid[deadRow][deadCol+i]=deadBytes[i];
-      }
-    }
-
-    // draw grid
+    if(t%8===0){for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const isDead=r===deadRow&&c>=deadCol&&c<deadCol+4;if(!isDead)grid[r][c]=Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase();}}
+    if(t>60){revealT++;const byteIdx=Math.floor(revealT/20);for(let i=0;i<=Math.min(byteIdx,3);i++){grid[deadRow][deadCol+i]=deadBytes[i];}}
     for(let r=0;r<rows;r++){
       for(let c=0;c<cols;c++){
-        const x=startX+c*(cellW+2);
-        const y=startY+r*(cellH+2);
+        const x=startX+c*(cellW+2);const y=startY+r*(cellH+2);
         const isDead=r===deadRow&&c>=deadCol&&c<deadCol+4&&t>60;
         const isRevealed=isDead&&grid[r][c]===deadBytes[c-deadCol];
-        ctx.fillStyle=isRevealed?C.glow:isDead?C.bright:C.mid;
+        if(isRevealed){ctx.fillStyle='rgba(0,255,65,0.1)';ctx.fillRect(x*SC,(y-1)*SC,cellW*SC,(cellH+1)*SC);ctx.fillStyle=C.glow;}
+        else{ctx.fillStyle=C.mid;}
         ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-        if(isRevealed){
-          // glow box
-          ctx.fillStyle='rgba(0,255,65,0.1)';
-          ctx.fillRect(x*SC,(y-1)*SC,cellW*SC,(cellH+1)*SC);
-          ctx.fillStyle=C.glow;
-        } else {
-          ctx.fillStyle=C.mid;
-        }
         ctx.fillText(grid[r][c],(x+cellW/2)*SC,(y+cellH*0.75)*SC);
       }
-      // address
-      ctx.fillStyle=C.dark||'#0a1f0a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='right';
+      ctx.fillStyle=C.dark;ctx.font=`${SC*3}px monospace`;ctx.textAlign='right';
       ctx.fillText(`0x${(0x7fff0+r*8).toString(16).toUpperCase()}`,(startX-3)*SC,(startY+r*(cellH+2)+cellH*0.75)*SC);
     }
-
-    // label after full reveal
-    if(t>140){
-      const alpha=Math.min(1,(t-140)/30);
-      ctx.globalAlpha=alpha;
-      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-      ctx.fillText('not random. intentional. someone put it there.',(GW/2)*SC,(GH-5)*SC);
-      ctx.globalAlpha=1;
-    }
-
+    if(t>140){const alpha=Math.min(1,(t-140)/30);ctx.globalAlpha=alpha;ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';ctx.fillText('not random. intentional. someone put it there.',(GW/2)*SC,(GH-5)*SC);ctx.globalAlpha=1;}
     if(t>220)btn.classList.add('visible');
     else raf=requestAnimationFrame(tick);
   }
   tick();
 }
 
-
 // ── Aleph One: book flies and hits heads ─────────────────────
 function animAlephOne(cv, btn){
   const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
   let t=0,raf=null;
-  // heads: {x,y,hit,hitT,bounce}
-  const heads=[
-    {x:60,y:GH-28,hit:false,hitT:0,bounce:0},
-    {x:110,y:GH-28,hit:false,hitT:0,bounce:0},
-    {x:160,y:GH-28,hit:false,hitT:0,bounce:0},
-    {x:210,y:GH-28,hit:false,hitT:0,bounce:0},
-    {x:260,y:GH-28,hit:false,hitT:0,bounce:0},
-  ];
-  // book projectile
+  const heads=[{x:60,y:GH-28,hit:false,hitT:0,bounce:0},{x:110,y:GH-28,hit:false,hitT:0,bounce:0},{x:160,y:GH-28,hit:false,hitT:0,bounce:0},{x:210,y:GH-28,hit:false,hitT:0,bounce:0},{x:260,y:GH-28,hit:false,hitT:0,bounce:0}];
   let book={x:8,y:GH-50,vx:1.8,vy:-2.2,angle:0,bounces:0};
   let done=false;
-
-  btn.onclick=()=>{
-    cancelAnimationFrame(raf);t=0;done=false;
-    book={x:8,y:GH-50,vx:1.8,vy:-2.2,angle:0,bounces:0};
-    heads.forEach(h=>{h.hit=false;h.hitT=0;h.bounce=0;});
-    btn.classList.remove('visible');tick();
-  };
-
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;done=false;book={x:8,y:GH-50,vx:1.8,vy:-2.2,angle:0,bounces:0};heads.forEach(h=>{h.hit=false;h.hitT=0;h.bounce=0;});btn.classList.remove('visible');tick();};
   function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
-
-  function drawHand(x,y){
-    // arm
-    px(x,y,C.bright,3,8);
-    // hand
-    px(x-1,y-2,C.bright,5,4);
-    // fingers
-    px(x-1,y-4,C.bright,1,3);
-    px(x+1,y-4,C.bright,1,3);
-    px(x+3,y-4,C.bright,1,3);
-  }
-
-  function drawBook(x,y,angle){
-    const bx=Math.round(x);
-    const by=Math.round(y);
-    // book body
-    ctx.save();
-    ctx.translate(bx*SC,by*SC);
-    ctx.rotate(angle);
-    ctx.fillStyle=C.glow;
-    ctx.fillRect(-7*SC,-5*SC,14*SC,10*SC);
-    ctx.fillStyle=C.bright;
-    ctx.fillRect(-6*SC,-4*SC,2*SC,8*SC);
-    // pages lines
-    ctx.fillStyle=C.black;
-    for(let i=0;i<3;i++)ctx.fillRect(-2*SC,(-3+i*3)*SC,8*SC,SC);
-    ctx.restore();
-  }
-
-  function drawHead(hd){
-    const x=hd.x;
-    const y=hd.y-hd.bounce;
-    const col=hd.hit?C.glow:C.mid;
-    // head circle pixel art
-    px(x-3,y-8,col,6,2);
-    px(x-4,y-6,col,8,5);
-    px(x-3,y-1,col,6,2);
-    // eyes
-    if(!hd.hit){
-      px(x-2,y-5,C.black,2,2);
-      px(x+1,y-5,C.black,2,2);
-    } else {
-      // X eyes when hit
-      px(x-2,y-5,C.black); px(x-1,y-4,C.black);
-      px(x+2,y-5,C.black); px(x+1,y-4,C.black);
-    }
-    // body
-    px(x-2,y+1,C.mid,4,6);
-    // stars if hit
-    if(hd.hit&&hd.hitT<30){
-      const s=Math.floor(hd.hitT/5)%2;
-      if(s===0){
-        px(x-5,y-10,C.glow,2,2);
-        px(x+4,y-10,C.glow,2,2);
-      }
-    }
-  }
-
+  function drawBook(x,y,angle){const bx=Math.round(x);const by=Math.round(y);ctx.save();ctx.translate(bx*SC,by*SC);ctx.rotate(angle);ctx.fillStyle=C.glow;ctx.fillRect(-7*SC,-5*SC,14*SC,10*SC);ctx.fillStyle=C.bright;ctx.fillRect(-6*SC,-4*SC,2*SC,8*SC);ctx.fillStyle=C.black;for(let i=0;i<3;i++)ctx.fillRect(-2*SC,(-3+i*3)*SC,8*SC,SC);ctx.restore();}
+  function drawHead(hd){const x=hd.x;const y=hd.y-hd.bounce;const col=hd.hit?C.glow:C.mid;px(x-3,y-8,col,6,2);px(x-4,y-6,col,8,5);px(x-3,y-1,col,6,2);if(!hd.hit){px(x-2,y-5,C.black,2,2);px(x+1,y-5,C.black,2,2);}else{px(x-2,y-5,C.black);px(x-1,y-4,C.black);px(x+2,y-5,C.black);px(x+1,y-4,C.black);}px(x-2,y+1,C.mid,4,6);if(hd.hit&&hd.hitT<30){const s=Math.floor(hd.hitT/5)%2;if(s===0){px(x-5,y-10,C.glow,2,2);px(x+4,y-10,C.glow,2,2);}}}
   function tick(){
-    t++;
-    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
-
-    // ground
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
     for(let x=0;x<GW;x++)px(x,GH-8,C.mid);
-
-    // title
     ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
     ctx.fillText('Phrack #49',GW/2*SC,9*SC);
-
-    // hand at left throwing
-    drawHand(4,GH-55);
-
-    // move book
-    if(!done){
-      book.x+=book.vx;
-      book.y+=book.vy;
-      book.vy+=0.12; // gravity
-      book.angle+=0.08;
-
-      // bounce on ground
-      if(book.y>GH-22){
-        book.y=GH-22;
-        book.vy*=-0.6;
-        book.vx*=0.95;
-        book.bounces++;
-      }
-
-      // check hit on heads
-      heads.forEach(h=>{
-        if(!h.hit&&Math.abs(book.x-h.x)<10&&Math.abs(book.y-h.y)<12){
-          h.hit=true;
-          book.vy=-1.5;
-          book.vx+=0.3;
-        }
-      });
-
-      if(book.bounces>4&&book.x>GW)done=true;
-    }
-
-    // update hit heads
-    heads.forEach(h=>{
-      if(h.hit){
-        h.hitT++;
-        h.bounce=Math.max(0,Math.sin(h.hitT*0.3)*6*(1-h.hitT/40));
-      }
-    });
-
-    // draw heads
+    if(!done){book.x+=book.vx;book.y+=book.vy;book.vy+=0.12;book.angle+=0.08;if(book.y>GH-22){book.y=GH-22;book.vy*=-0.6;book.vx*=0.95;book.bounces++;}heads.forEach(h=>{if(!h.hit&&Math.abs(book.x-h.x)<10&&Math.abs(book.y-h.y)<12){h.hit=true;book.vy=-1.5;book.vx+=0.3;}});if(book.bounces>4&&book.x>GW)done=true;}
+    heads.forEach(h=>{if(h.hit){h.hitT++;h.bounce=Math.max(0,Math.sin(h.hitT*0.3)*6*(1-h.hitT/40));}});
     heads.forEach(h=>drawHead(h));
-
-    // draw book
     drawBook(book.x,book.y,book.angle);
-
-    // knowledge spreading label
     const hitCount=heads.filter(h=>h.hit).length;
-    if(hitCount>0){
-      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-      ctx.fillText(`minds reached: ${hitCount}`,GW/2*SC,18*SC);
-    }
-
+    if(hitCount>0){ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';ctx.fillText(`minds reached: ${hitCount}`,GW/2*SC,18*SC);}
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
     ctx.fillText('Aleph One — 1996 — knowledge that cannot be unlearned',(GW/2)*SC,(GH-3)*SC);
-
     if(done)btn.classList.add('visible');
     raf=requestAnimationFrame(tick);
   }
   tick();
 }
 
-// ── Morris Worm: apples getting infected by worms ─────────────
+// ── Morris Worm ───────────────────────────────────────────────
 function animMorrisWorm(cv, btn){
   const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
   let t=0,raf=null;
-
-  const apples=[
-    {x:40, y:GH/2,infected:true, infectedT:0,rot:0,worms:[]},
-    {x:100,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
-    {x:160,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
-    {x:220,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
-    {x:280,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},
-  ];
-
-  // traveling worms between apples
+  const apples=[{x:40,y:GH/2,infected:true,infectedT:0,rot:0,worms:[]},{x:100,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},{x:160,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},{x:220,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]},{x:280,y:GH/2,infected:false,infectedT:0,rot:0,worms:[]}];
   let travelers=[];
-
-  btn.onclick=()=>{
-    cancelAnimationFrame(raf);t=0;travelers=[];
-    apples.forEach((a,i)=>{a.infected=i===0;a.infectedT=0;a.rot=0;a.worms=[];});
-    btn.classList.remove('visible');tick();
-  };
-
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;travelers=[];apples.forEach((a,i)=>{a.infected=i===0;a.infectedT=0;a.rot=0;a.worms=[];});btn.classList.remove('visible');tick();};
   function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
-
-  function drawApple(a){
-    const x=a.x; const y=a.y;
-    const rot=Math.min(1,a.rot);
-    const bodyCol=a.infected?(rot>0.5?C.dark:'#2a6b2a'):(C.bright);
-    const spotCol=a.infected?C.mid:C.dark;
-
-    // stem
-    px(x,y-10,C.mid,1,3);
-    px(x+1,y-10,C.mid,1,2);
-    // leaf
-    px(x+2,y-10,C.bright,3,2);
-
-    // apple body
-    px(x-5,y-7,bodyCol,10,2);
-    px(x-7,y-5,bodyCol,14,8);
-    px(x-5,y+3,bodyCol,10,2);
-
-    // rot spots
-    if(rot>0.3){
-      px(x-2,y-3,spotCol,3,3);
-      px(x+2,y,spotCol,2,2);
-    }
-    if(rot>0.7){
-      px(x-4,y-1,spotCol,2,2);
-      px(x+1,y-5,spotCol,3,3);
-    }
-
-    // worms inside
-    a.worms.forEach((w,i)=>{
-      const wx=x-3+Math.sin(t*0.1+i*2)*5;
-      const wy=y-2+Math.cos(t*0.08+i)*3;
-      px(wx,wy,C.glow,2,1);
-      px(wx+2,wy,C.glow,1,1);
-    });
-  }
-
+  function drawApple(a){const x=a.x;const y=a.y;const rot=Math.min(1,a.rot);const bodyCol=a.infected?(rot>0.5?C.dark:'#2a6b2a'):(C.bright);const spotCol=a.infected?C.mid:C.dark;px(x,y-10,C.mid,1,3);px(x+1,y-10,C.mid,1,2);px(x+2,y-10,C.bright,3,2);px(x-5,y-7,bodyCol,10,2);px(x-7,y-5,bodyCol,14,8);px(x-5,y+3,bodyCol,10,2);if(rot>0.3){px(x-2,y-3,spotCol,3,3);px(x+2,y,spotCol,2,2);}if(rot>0.7){px(x-4,y-1,spotCol,2,2);px(x+1,y-5,spotCol,3,3);}a.worms.forEach((w,i)=>{const wx=x-3+Math.sin(t*0.1+i*2)*5;const wy=y-2+Math.cos(t*0.08+i)*3;px(wx,wy,C.glow,2,1);px(wx+2,wy,C.glow,1,1);});}
   function tick(){
-    t++;
-    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
-
-    // ground
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
     for(let x=0;x<GW;x++)px(x,GH-8,C.dark);
-
     ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
     ctx.fillText('internet — 1988',GW/2*SC,9*SC);
-
-    // spread worms every 90 frames
-    if(t%90===0){
-      apples.forEach((a,i)=>{
-        if(a.infected&&i+1<apples.length&&!apples[i+1].infected){
-          travelers.push({
-            sx:a.x,sy:a.y,
-            tx:apples[i+1].x,ty:apples[i+1].y,
-            progress:0,target:i+1,
-            wy:0
-          });
-        }
-      });
-    }
-
-    // move travelers
-    travelers.forEach(w=>{
-      w.progress=Math.min(1,w.progress+0.015);
-      w.wy=Math.sin(w.progress*Math.PI)*-15;
-      if(w.progress>=1){
-        const a=apples[w.target];
-        a.infected=true;
-        a.worms.push({});
-      }
-    });
+    if(t%90===0){apples.forEach((a,i)=>{if(a.infected&&i+1<apples.length&&!apples[i+1].infected){travelers.push({sx:a.x,sy:a.y,tx:apples[i+1].x,ty:apples[i+1].y,progress:0,target:i+1,wy:0});}});}
+    travelers.forEach(w=>{w.progress=Math.min(1,w.progress+0.015);w.wy=Math.sin(w.progress*Math.PI)*-15;if(w.progress>=1){const a=apples[w.target];a.infected=true;a.worms.push({});}});
     travelers=travelers.filter(w=>w.progress<1);
-
-    // update infected apples
-    apples.forEach(a=>{
-      if(a.infected){
-        a.infectedT++;
-        a.rot=Math.min(1,a.infectedT/120);
-        if(a.worms.length<3&&a.infectedT%30===0)a.worms.push({});
-      }
-    });
-
-    // draw connection lines
-    for(let i=0;i<apples.length-1;i++){
-      ctx.strokeStyle=C.dark;ctx.lineWidth=1;
-      ctx.beginPath();
-      ctx.moveTo(apples[i].x*SC,(apples[i].y+5)*SC);
-      ctx.lineTo(apples[i+1].x*SC,(apples[i+1].y+5)*SC);
-      ctx.stroke();
-    }
-
-    // draw travelers
-    travelers.forEach(w=>{
-      const x=w.sx+(w.tx-w.sx)*w.progress;
-      const y=w.sy+w.wy;
-      ctx.fillStyle=C.glow;
-      // pixel worm shape
-      ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,4*SC,2*SC);
-      ctx.fillRect((Math.round(x)+2)*SC,(Math.round(y)-1)*SC,2*SC,SC);
-    });
-
-    // draw apples
+    apples.forEach(a=>{if(a.infected){a.infectedT++;a.rot=Math.min(1,a.infectedT/120);if(a.worms.length<3&&a.infectedT%30===0)a.worms.push({});}});
+    for(let i=0;i<apples.length-1;i++){ctx.strokeStyle=C.dark;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(apples[i].x*SC,(apples[i].y+5)*SC);ctx.lineTo(apples[i+1].x*SC,(apples[i+1].y+5)*SC);ctx.stroke();}
+    travelers.forEach(w=>{const x=w.sx+(w.tx-w.sx)*w.progress;const y=w.sy+w.wy;ctx.fillStyle=C.glow;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,4*SC,2*SC);ctx.fillRect((Math.round(x)+2)*SC,(Math.round(y)-1)*SC,2*SC,SC);});
     apples.forEach(a=>drawApple(a));
-
-    // infected count
     const infectedCount=apples.filter(a=>a.infected).length;
-    ctx.fillStyle=infectedCount===apples.length?C.glow:C.mid;
-    ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillStyle=infectedCount===apples.length?C.glow:C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
     ctx.fillText(`infected: ${infectedCount}/${apples.length}`,GW/2*SC,18*SC);
-
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
     ctx.fillText('Morris Worm — 6000 machines in 24h',(GW/2)*SC,(GH-3)*SC);
-
     if(infectedCount===apples.length&&t>200)btn.classList.add('visible');
     raf=requestAnimationFrame(tick);
   }
   tick();
 }
 
-// ── Shellshock: thief enters through unguarded window ─────────
+// ── Shellshock ───────────────────────────────────────────────
 function animShellshock(cv, btn){
   const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
   const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
-  let t=0,raf=null,phase='queue',thiefX=0,thiefY=0,thiefIn=false,doneT=0;
-
-  // queue people waiting at door
+  let t=0,raf=null,phase='queue',thiefX=0,thiefY=0,doneT=0;
   const people=[];
-  for(let i=0;i<5;i++)people.push({x:GW-30-i*14,y:GH-20,look:i%2===0});
-
-  const DOOR_X=GW-18;
-  const WINDOW_X=25;
-  const WALL_Y=GH-40;
-
-  btn.onclick=()=>{
-    cancelAnimationFrame(raf);t=0;phase='queue';thiefX=4;thiefY=GH-20;thiefIn=false;doneT=0;
-    btn.classList.remove('visible');tick();
-  };
-
-  thiefX=4; thiefY=GH-20;
-
+  for(let i=0;i<5;i++)people.push({x:GW-30-i*14,y:GH-20});
+  const DOOR_X=GW-18,WINDOW_X=25,WALL_Y=GH-40;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='queue';thiefX=4;thiefY=GH-20;doneT=0;btn.classList.remove('visible');tick();};
+  thiefX=4;thiefY=GH-20;
   function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
-
-  function drawWall(){
-    // wall
-    for(let x=10;x<GW-10;x++)px(x,WALL_Y,C.mid,1,2);
-    for(let y=WALL_Y;y<GH-8;y++){px(10,y,C.mid);px(GW-10,y,C.mid);}
-    // ground
-    for(let x=0;x<GW;x++)px(x,GH-8,C.mid);
-
-    // door with lock
-    px(DOOR_X-6,WALL_Y,C.dark,12,30);
-    px(DOOR_X-5,WALL_Y+1,C.mid,10,28);
-    // lock
-    px(DOOR_X-2,WALL_Y+12,C.glow,4,4);
-    px(DOOR_X-1,WALL_Y+10,C.glow,2,3);
-
-    // window (small, left side — unnoticed)
-    px(WINDOW_X-4,WALL_Y+2,C.dark,10,12);
-    px(WINDOW_X-3,WALL_Y+3,C.mid,8,10);
-    // window frame
-    ctx.strokeStyle=C.mid;ctx.lineWidth=SC;
-    ctx.strokeRect((WINDOW_X-4)*SC,(WALL_Y+2)*SC,10*SC,12*SC);
-    // small label
-    ctx.fillStyle=C.dark;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
-    ctx.fillText('env',(WINDOW_X)*SC,(WALL_Y+18)*SC);
-  }
-
-  function drawPerson(x,y,isThief){
-    if(isThief){
-      // striped shirt
-      px(x-2,y-5,C.bright,4,5);
-      px(x-2,y-4,C.mid,4,1);
-      px(x-2,y-2,C.mid,4,1);
-      // mask/antifaz
-      px(x-2,y-8,C.bright,4,3);
-      px(x-2,y-7,C.black,4,2);
-      // head
-      px(x-1,y-10,C.bright,2,3);
-      // legs
-      px(x-2,y,C.mid,2,4);
-      px(x+1,y,C.mid,2,4);
-    } else {
-      // regular person
-      px(x-1,y-10,C.mid,2,3);
-      px(x-2,y-7,C.mid,4,5);
-      px(x-1,y,C.mid,2,4);
-    }
-  }
-
+  function drawWall(){for(let x=10;x<GW-10;x++)px(x,WALL_Y,C.mid,1,2);for(let y=WALL_Y;y<GH-8;y++){px(10,y,C.mid);px(GW-10,y,C.mid);}for(let x=0;x<GW;x++)px(x,GH-8,C.mid);px(DOOR_X-6,WALL_Y,C.dark,12,30);px(DOOR_X-5,WALL_Y+1,C.mid,10,28);px(DOOR_X-2,WALL_Y+12,C.glow,4,4);px(DOOR_X-1,WALL_Y+10,C.glow,2,3);px(WINDOW_X-4,WALL_Y+2,C.dark,10,12);px(WINDOW_X-3,WALL_Y+3,C.mid,8,10);ctx.strokeStyle=C.mid;ctx.lineWidth=SC;ctx.strokeRect((WINDOW_X-4)*SC,(WALL_Y+2)*SC,10*SC,12*SC);ctx.fillStyle=C.dark;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';ctx.fillText('env',(WINDOW_X)*SC,(WALL_Y+18)*SC);}
+  function drawPerson(x,y,isThief){if(isThief){px(x-2,y-5,C.bright,4,5);px(x-2,y-4,C.mid,4,1);px(x-2,y-2,C.mid,4,1);px(x-2,y-8,C.bright,4,3);px(x-2,y-7,C.black,4,2);px(x-1,y-10,C.bright,2,3);px(x-2,y,C.mid,2,4);px(x+1,y,C.mid,2,4);}else{px(x-1,y-10,C.mid,2,3);px(x-2,y-7,C.mid,4,5);px(x-1,y,C.mid,2,4);}}
   function tick(){
-    t++;
-    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
-
-    // title
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
     ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
     ctx.fillText('CVE-2014-6271',GW/2*SC,9*SC);
-
     drawWall();
-
-    // queue people at door
-    people.forEach(p=>{
-      drawPerson(p.x,p.y,false);
-      // looking at lock
-      ctx.fillStyle=C.mid;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
-      if(t%60<30)ctx.fillText('?',p.x*SC,(p.y-14)*SC);
-    });
-
-    // lock attention arrows
-    if(t%40<20){
-      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
-      ctx.fillText('↑ LOCK',(DOOR_X-2)*SC,(WALL_Y-4)*SC);
-    }
-
-    // thief logic
-    if(phase==='queue'&&t>60){
-      phase='approach';
-    }
-    if(phase==='approach'){
-      // thief walks toward window
-      if(thiefX<WINDOW_X-6){
-        thiefX+=0.8;
-      } else {
-        phase='climb';
-      }
-    }
-    if(phase==='climb'){
-      // thief climbs through window
-      if(thiefY>WALL_Y+5){
-        thiefY-=0.8;
-        thiefX=WINDOW_X-2;
-      } else {
-        phase='inside';
-        thiefX=WINDOW_X+8;
-      }
-    }
-    if(phase==='inside'){
-      // thief inside, walks around
-      if(thiefX<GW-25){
-        thiefX+=0.6;
-      } else {
-        doneT++;
-        if(doneT>60)phase='done';
-      }
-    }
-
-    // draw thief
+    people.forEach(p=>{drawPerson(p.x,p.y,false);ctx.fillStyle=C.mid;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';if(t%60<30)ctx.fillText('?',p.x*SC,(p.y-14)*SC);});
+    if(t%40<20){ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';ctx.fillText('↑ LOCK',(DOOR_X-2)*SC,(WALL_Y-4)*SC);}
+    if(phase==='queue'&&t>60)phase='approach';
+    if(phase==='approach'){if(thiefX<WINDOW_X-6)thiefX+=0.8;else phase='climb';}
+    if(phase==='climb'){if(thiefY>WALL_Y+5){thiefY-=0.8;thiefX=WINDOW_X-2;}else{phase='inside';thiefX=WINDOW_X+8;}}
+    if(phase==='inside'){if(thiefX<GW-25)thiefX+=0.6;else{doneT++;if(doneT>60)phase='done';}}
     if(phase!=='queue')drawPerson(thiefX,thiefY,true);
-
-    // inside message
-    if(phase==='inside'||phase==='done'){
-      ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
-      const shake=phase==='inside'&&doneT<20?(Math.random()-.5)*2:0;
-      ctx.fillText('INSIDE',(GW/2+shake)*SC,(WALL_Y-6)*SC);
-    }
-
-    // year label
+    if(phase==='inside'||phase==='done'){ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';const shake=phase==='inside'&&doneT<20?(Math.random()-.5)*2:0;ctx.fillText('INSIDE',(GW/2+shake)*SC,(WALL_Y-6)*SC);}
     ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
     ctx.fillText('25 years. nobody checked the window.',(GW/2)*SC,(GH-3)*SC);
-
     if(phase==='done')btn.classList.add('visible');
     raf=requestAnimationFrame(tick);
   }
   tick();
 }
 
-// ══════════════════════════════════════════════════════════════
-// SCREENS
-// ══════════════════════════════════════════════════════════════
-
-async function main(){
-  busy=true;clear();
-  await sleep(400);
-  await cmd('whoami',30);
-  await out('<span class="hi">t474-r0b07</span>');
-  gap(true);
-  await cmd('cat /etc/identity',20);
-  await out('red teamer in progress &nbsp;·&nbsp; systems builder');
-  await out('<span class="lo">Bolivia 🇧🇴</span>',true,20);
-  gap(true);
-  await cmd('ls -la',20);
-  await out('<span class="lo">projects &nbsp; progress &nbsp; lore &nbsp; contact</span>',true,30);
-  gap();
-  busy=false;
-  await showOpts([
-    {label:'projects',action:screenProjects},
-    {label:'progress',action:screenProgress},
-    {label:'lore',    action:screenLore},
-    {label:'contact', action:screenContact},
-  ]);
-}
-
-async function screenProjects(){
-  busy=true;clear();
-  await cmd('ls -la projects/',20);
-  await out('<span class="lo">4 repositories found</span>',true);
-  gap();
-  busy=false;
-  await showOpts([
-    {label:'SCCP-DTEX',   action:()=>screenProjectDetail({
-      name:'SCCP-DTEX',tag:'LIVE',
-      desc:'Tactical law enforcement command center — WebApp',
-      stack:'Flutter Web · Supabase · GetX · Clean Architecture',
-      detail:'GPS spoofing detection · role-based access · full audit trail · real-time &lt;1s',
-      highlights:[
-        'Built with offensive thinking: every feature is a countermeasure.',
-        'VPN detection · root detection · full GPS anomaly logging.',
-        'Role-based access: operators, supervisors, commanders.',
-      ],
-      url:'https://github.com/t474-r0b07/SCCP-DTEX',
-      extended:[
-        'Sistema desplegado para unidades tácticas reales en Bolivia.',
-        'Arquitectura: Clean Architecture + GetX state management.',
-        'Supabase Realtime para actualizaciones GPS con latencia < 1 segundo.',
-        'Cada acción del operador queda registrada en audit trail inmutable.',
-        'Detecta VPN activa, GPS falso y dispositivos rooteados en tiempo real.',
-        '// construido pensando en cómo lo atacaría alguien.',
-      ]
-    })},
-    {label:'SCCP-Mobile', action:()=>screenProjectDetail({
-      name:'SCCP-Mobile',tag:'LIVE',
-      desc:'Android field app for tactical units',
-      stack:'Flutter · BLoC · Hive · Play Integrity API',
-      detail:'Offline-first · root detection · VPN fingerprinting · GPS anti-spoofing',
-      highlights:[
-        'The weakest point of a command platform is the device in the field.',
-        'Hive for offline persistence. Syncs when signal returns.',
-        'Play Integrity for device attestation at login.',
-      ],
-      url:'https://github.com/t474-r0b07/SCCP-Mobile',
-      extended:[
-        'App de campo: el oficial la usa mientras patrulla, sin depender del servidor.',
-        'Hive DB local — persiste misiones, incidentes y coordenadas offline.',
-        'Al recuperar señal, sincroniza automáticamente con el Command Center.',
-        'Play Integrity API: verifica que el dispositivo no está comprometido.',
-        'Background service: reporta GPS cada N segundos aunque la app esté minimizada.',
-        '// si el dispositivo está rooteado, el sistema lo sabe antes que el oficial.',
-      ]
-    })},
-    {label:'ctf-writeups',action:()=>screenProjectDetail({
-      name:'ctf-writeups',tag:'ACTIVE',
-      desc:'Not the flag — the thinking.',
-      stack:'picoCTF · TryHackMe · OverTheWire · HackTheBox',
-      detail:'Forensics · Steganography · Buffer Overflow · Cryptography',
-      highlights:[
-        'The [ATTEMPTS] section is the core. Not the solution.',
-        'OverTheWire Bandit: 34/34. Leviathan: 8/8. Narnia: active.',
-        'Lore folder: why the vulnerabilities exist in the first place.',
-      ],
-      url:'https://github.com/t474-r0b07/ctf-writeups',
-      extended:[
-        '// narnia0 — primer buffer overflow.',
-        'El programa lee input sin validar longitud. La pila se desborda.',
-        'Variable adyacente en memoria: val=0x41414141. Shell obtenida.',
-        '---',
-        'Cada writeup tiene una sección [ATTEMPTS] — los intentos fallidos.',
-        'El flag es incidental. El razonamiento es el contenido.',
-        'La carpeta /lore documenta por qué las vulnerabilidades existen.',
-        '// el que quiere entender, que entienda.',
-      ]
-    })},
-    {label:'t474',        action:()=>screenProjectDetail({
-      name:'t474',tag:'IN DEV',
-      desc:'Narrative hacking game — terminal-based, lore-driven',
-      stack:'// classified',
-      detail:'The interface IS the world. Not all puzzles look like puzzles.',
-      highlights:[
-        'A game where the terminal is not the UI. It is the world.',
-        'Lore-driven: every command has history behind it.',
-        '// more information is itself a vulnerability',
-      ],
-      url:'https://github.com/t474-r0b07/t474',
-      extended:[
-        '// access denied.',
-        '// clearance level insufficient.',
-        '// but you already knew that.',
-        '---',
-        'Lo que podemos decir: es un juego que se juega sin saber que estás jugando.',
-        'La narrativa y los puzzles coexisten en la misma interfaz.',
-        '// más información es en sí misma una vulnerabilidad.',
-      ]
-    })},
-  ]);
-  gap();
-  addBack(main);
-}
-
-async function screenProjectDetail(p){
-  busy=true;clear();
-  await cmd(`cat ${p.name}/README.md`,20);
-  gap(true);
-  await out(`<span class="hi">${p.name}</span> &nbsp;<span class="lo">[ ${p.tag} ]</span>`);
-  await out(p.desc,false,60);
-  gap(true);
-  await cmd('cat stack.txt',18);
-  await out(`<span class="lo">${p.stack}</span>`,true,40);
-  gap(true);
-  await cmd('cat features.txt',18);
-  await out(p.detail,false,40);
-  gap(true);
-  await cmd('cat notes.txt',18);
-  for(const h of p.highlights){
-    await out(h,true,30);
-  }
-  gap();
-  busy=false;
-
-  await showOpts([
-    {
-      label:'ver más',
-      action: async ()=>{
-        busy=true;
-        gap(true);
-        await cmd('cat details.txt',18);
-        for(const line of (p.extended||['// no additional data found.'])){
-          await out(line,true,25);
-        }
-        gap();
-        busy=false;
-        await showOpts([
-          {label:'github →',action:()=>open(p.url,'_blank')},
-        ]);
-        gap(true);
-        addBack(screenProjects);
+// ── Y2K: clock rolling over from 99 to 00 ────────────────────
+function animY2K(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase='countdown',rollT=0,chaos=false,chaosT=0;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='countdown';rollT=0;chaos=false;chaosT=0;btn.classList.remove('visible');tick();};
+  const systems=['POWER GRID','BANK SYSTEM','AIR TRAFFIC','HOSPITAL DB','MILITARY NET'];
+  let sysStates=systems.map(()=>({fail:false,failT:0}));
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    // big clock display
+    const sec=Math.floor(t/2)%60;
+    const yr=phase==='countdown'?99:phase==='roll'?Math.floor(rollT/8)%100:0;
+    const yrStr=String(yr).padStart(2,'0');
+    const glitch=phase==='roll'&&rollT>20&&Math.random()>0.7;
+    ctx.fillStyle=phase==='done'?C.bright:C.glow;
+    ctx.font=`${SC*14}px monospace`;ctx.textAlign='center';
+    ctx.fillText(glitch?'??':yrStr,GW/2*SC,(GH/2-8)*SC);
+    // label
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('YEAR (stored as 2 digits)',GW/2*SC,14*SC);
+    // systems
+    const sysY=GH/2+12;
+    systems.forEach((s,i)=>{
+      const x=8+i*(GW/5);
+      const state=sysStates[i];
+      const col=state.fail?C.glow:C.dim||'#1a4d1a';
+      ctx.fillStyle=col;ctx.font=`${SC*2}px monospace`;ctx.textAlign='left';
+      ctx.fillText(s,x*SC,sysY*SC);
+      const statusCol=state.fail?(chaosT%6<3?C.glow:C.dark):C.mid;
+      ctx.fillStyle=statusCol;
+      ctx.fillText(state.fail?'[FAIL]':'[  OK]',x*SC,(sysY+5)*SC);
+    });
+    // phase logic
+    if(phase==='countdown'&&t>80){phase='roll';rollT=0;}
+    if(phase==='roll'){
+      rollT++;
+      if(rollT>60){phase='done';chaos=true;}
+    }
+    if(chaos){
+      chaosT++;
+      // cascade failures
+      const failIdx=Math.floor(chaosT/15);
+      for(let i=0;i<=Math.min(failIdx,systems.length-1);i++){
+        sysStates[i].fail=true;
       }
-    },
-    {label:'github →', action:()=>open(p.url,'_blank')},
-  ]);
-
-  gap(true);
-  addBack(screenProjects);
+      // screen shake
+      if(chaosT<30){
+        ctx.fillStyle=`rgba(0,255,65,${Math.max(0,0.3-chaosT*0.01)})`;
+        ctx.fillRect(0,0,W,H);
+      }
+    }
+    // bottom label
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('1900 or 2000? the machine assumed. it was wrong.',(GW/2)*SC,(GH-5)*SC);
+    if(chaos&&chaosT>120)btn.classList.add('visible');
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
 }
 
-
-async function addSection(label){
-  await sleep(120);
-  const t=document.createElement('div');
-  t.className='psection-title';
-  t.textContent='// '+label;
-  container.appendChild(t);
-  await sleep(30);
-  t.classList.add('shown');
-  await sleep(80);
+// ── PRISM: companies delivering data to NSA ───────────────────
+function animPrism(cv, btn){
+  const W=560,H=220,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null;
+  const companies=['Microsoft','Yahoo','Google','Facebook','YouTube','Skype','Apple'];
+  const cx=GW-25,cy=GH/2;
+  let revealed=[];
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;revealed=[];btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    // NSA node
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('NSA',cx*SC,cy*SC);
+    ctx.strokeStyle=C.glow;ctx.lineWidth=SC;
+    ctx.strokeRect((cx-10)*SC,(cy-8)*SC,20*SC,12*SC);
+    // reveal companies one by one
+    const revealIdx=Math.floor(t/40);
+    for(let i=0;i<Math.min(revealIdx,companies.length);i++){
+      const angle=(i/(companies.length-1))*Math.PI*1.2-Math.PI*0.6;
+      const ex=20;
+      const ey=cy+Math.sin(angle)*(GH*0.38);
+      // pulse line
+      const pulsePhase=(t+i*20)%60;
+      const pulseX=ex+(cx-ex)*(pulsePhase/60);
+      const pulseY=ey+(cy-ey)*(pulsePhase/60);
+      ctx.strokeStyle=C.dark;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(ex*SC,ey*SC);ctx.lineTo(cx*SC,cy*SC);ctx.stroke();
+      ctx.fillStyle=C.glow;
+      ctx.fillRect(Math.round(pulseX)*SC,Math.round(pulseY)*SC,3*SC,3*SC);
+      // company label
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(companies[i],2*SC,ey*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*2}px monospace`;
+      ctx.fillText('[access granted]',2*SC,(ey+5)*SC);
+    }
+    // title
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('PRISM — 2007-2013',(GW/2)*SC,10*SC);
+    // bottom
+    const done=revealIdx>=companies.length;
+    if(done){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('no hack needed. they had the key.',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    } else {
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('Snowden — June 6, 2013',(GW/2)*SC,(GH-5)*SC);
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
 }
 
-async function addBar(label0,label1,pct,note,cls){
-  await sleep(70);
-  const row=document.createElement('div');
-  row.className='prow';
-  row.innerHTML=`<span class="plabel"><strong>${label0}</strong> ${label1}</span><div class="pbar"><div class="pfill ${cls}"></div></div><span class="ppct">${note}</span>`;
-  container.appendChild(row);
-  await sleep(20);
-  row.classList.add('shown');
-  const fill=row.querySelector('.pfill');
-  await sleep(80);
-  fill.style.width=pct+'%';
+// ── Cambridge Analytica: OCEAN profile building ───────────────
+function animCambridgeAnalytica(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null;
+  const traits=['O','C','E','A','N'];
+  const traitNames=['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+  const targetPct=[72,45,61,38,83];
+  let currentPct=[0,0,0,0,0];
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;currentPct=[0,0,0,0,0];btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('OCEAN Profile — building...',GW/2*SC,10*SC);
+    // update bars
+    const speed=0.4;
+    let allDone=true;
+    for(let i=0;i<5;i++){
+      if(currentPct[i]<targetPct[i]){currentPct[i]=Math.min(targetPct[i],currentPct[i]+speed);allDone=false;}
+    }
+    // draw bars
+    const barW=55,barH=4,startX=10,barY=22;
+    for(let i=0;i<5;i++){
+      const x=startX;
+      const y=barY+i*14;
+      // trait letter
+      ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='left';
+      ctx.fillText(traits[i],(x)*SC,(y+4)*SC);
+      // name
+      ctx.fillStyle=C.dim||'#2a4a2a';ctx.font=`${SC*3}px monospace`;
+      ctx.fillText(traitNames[i],(x+7)*SC,(y+4)*SC);
+      // bar bg
+      ctx.fillStyle=C.dark;ctx.fillRect((x+38)*SC,y*SC,barW*SC,barH*SC);
+      // bar fill
+      ctx.fillStyle=currentPct[i]>60?C.glow:C.bright;
+      ctx.fillRect((x+38)*SC,y*SC,Math.round(currentPct[i]/100*barW)*SC,barH*SC);
+      // pct
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(Math.floor(currentPct[i])+'%',(x+38+barW+3)*SC,(y+4)*SC);
+    }
+    if(allDone){
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('87,000,000 profiles built. without consent.',GW/2*SC,(GH/2+18)*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('Cambridge Analytica — 2013-2018',GW/2*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    } else {
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('your likes. your shares. your time spent reading.',(GW/2)*SC,(GH-5)*SC);
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
 }
 
-async function screenProgress(){
-  busy=true;clear();
-  await cmd('tail -f progress.log',20);
-  await out('<span class="lo">reading live state...</span>',true,30);
-  gap();
-
-  busy=false;
-
-  // — wargames —
-  await addSection('wargames');
-  await addBar('OTW','Bandit',100,'34/34','done');
-  await addBar('OTW','Leviathan',100,'8/8','done');
-  await addBar('OTW','Narnia',35,'active','warn');
-  await addBar('HTB','active player',35,'35%','warn');
-
-  // — certifications —
-  await addSection('path');
-  await addBar('red team','certification',8,'queued','crit');
-  await addBar('first','CVE',2,'endgame ←','crit');
-
-  gap();
-
-  // — incident archive —
-  await cmd('cat incident_archive.log',18);
-  await sleep(200);
-
-  await addSection('real incidents');
-
-  const incidents=[
-    {label0:'2026.01',label1:'prison admin workstation',note:'[terminated]',pct:100,cls:'done'},
-    {label0:'2026.03',label1:'rogue gateway / OEP-SERECI',note:'[isolated]',pct:100,cls:'done'},
-    {label0:'2026.04',label1:'VCR surveillance intrusion',note:'[contained]',pct:92,cls:'warn'},
+// ── ECHELON: global intercept network ────────────────────────
+function animEchelon(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null;
+  const nodes=[
+    {x:35,y:30,name:'Menwith Hill'},
+    {x:200,y:50,name:'Sugar Grove'},
+    {x:80,y:90,name:'Leitrim'},
+    {x:220,y:85,name:'Pine Gap'},
+    {x:145,y:35,name:'Misawa'},
   ];
-
-  for(const i of incidents){
-    await addBar(i.label0,i.label1,i.pct,i.note,i.cls);
+  const packets=[];
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;packets.length=0;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('ECHELON — Five Eyes',GW/2*SC,10*SC);
+    // draw network lines
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+      ctx.strokeStyle=C.dark;ctx.lineWidth=1;ctx.beginPath();
+      ctx.moveTo(nodes[i].x*SC,nodes[i].y*SC);
+      ctx.lineTo(nodes[j].x*SC,nodes[j].y*SC);
+      ctx.stroke();
+    }
+    // spawn intercept packets
+    if(t%18===0){
+      const src={x:Math.random()*GW,y:GH/2+Math.random()*30};
+      const dst=nodes[Math.floor(Math.random()*nodes.length)];
+      packets.push({x:src.x,y:src.y,tx:dst.x,ty:dst.y,p:0,captured:false});
+    }
+    // move packets
+    packets.forEach(p=>{p.p=Math.min(1,p.p+0.025);p.x=p.x+(p.tx-p.x)*0.025;p.y=p.y+(p.ty-p.y)*0.025;if(p.p>0.95)p.captured=true;});
+    packets.forEach(p=>{ctx.fillStyle=p.captured?C.glow:C.mid;ctx.fillRect(Math.round(p.x)*SC,Math.round(p.y)*SC,3*SC,2*SC);});
+    // draw nodes
+    nodes.forEach(n=>{
+      px(n.x-4,n.y-4,C.glow,8,8);
+      ctx.fillStyle=C.black;
+      ctx.fillRect((n.x-3)*SC,(n.y-3)*SC,6*SC,6*SC);
+      px(n.x-1,n.y-1,C.glow,2,2);
+      ctx.fillStyle=C.bright;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
+      ctx.fillText(n.name,n.x*SC,(n.y+9)*SC);
+    });
+    // intercept counter
+    const captured=packets.filter(p=>p.captured).length;
+    if(captured>0){
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText(`intercepted: ${captured}`,GW/2*SC,22*SC);
+    }
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('1960 → present. capture all. filter after.',(GW/2)*SC,(GH-5)*SC);
+    if(t>200)btn.classList.add('visible');
+    raf=requestAnimationFrame(tick);
   }
-
-  gap(true);
-
-  await out('<span class="lo">2026.01 —</span> unauthorized remote access on prison administration system. detected via anomaly in active sessions.',true,18);
-  await sleep(100);
-  await out('<span class="lo">2026.03 —</span> rogue gateway (Xiaomi / MOBILETECBO.LOCAL) performing ARP sweep + DNS hijack against OEP/SERECI assets at institutional fair. isolated. MAC blacklisted.',true,18);
-  await sleep(100);
-  await out('<span class="lo">2026.04 —</span> intrusion attempt against surveillance recorder. traffic pattern identified. access vector blocked.',true,18);
-
-  gap();
-
-  const footer=document.createElement('div');
-  footer.className='live-footer';
-  footer.innerHTML=`
-    <div class="scan">$ monitor --live</div>
-    <div class="scan">listening for anomalies<span class="blinkdot"></span></div>
-  `;
-  container.appendChild(footer);
-
-  gap();
-  addBack(main);
+  tick();
 }
 
-async function screenLore(){
-  busy=true;clear();
-  await cmd('cat /ctf-writeups/lore/README.md',20);
-  gap(true);
-  await out('archivos que nadie te va a pedir que leas.',true,60);
-  await out('archivos que no podés dejar de leer.',true,60);
-  gap(true);
-  await cmd('echo $ADVERTENCIA',18);
-  await out('el que ejecuta sin entender',false,40);
-  await out('es el primero en caer.',true,40);
-  gap();
-  busy=false;
-  await showOpts([
-    {label:'danny cohen',  action:()=>screenLoreEntry('danny cohen')},
-    {label:'little endian',action:()=>screenLoreEntry('little endian')},
-    {label:'jerry saltzer',action:()=>screenLoreEntry('jerry saltzer')},
-    {label:'ariane 5',     action:()=>screenLoreEntry('ariane 5')},
-    {label:'aleph one',    action:()=>screenLoreEntry('aleph one')},
-    {label:'gusano morris',action:()=>screenLoreEntry('gusano morris')},
-    {label:'shellshock',   action:()=>screenLoreEntry('shellshock')},
-  ]);
-  gap();
-  addBack(main);
-}
-
-async function screenLoreEntry(title){
-  busy=true;clear();
-  await cmd(`cat /lore/${title.replace(/ /g,'_')}.md`,20);
-  gap(true);
-  await out(`<span class="hi">${title}</span>`);
-  gap(true);
-
-  if(title==='ariane 5'){
-    await out('500 millones de dólares. 4 bytes.',false,60);
-    await out('El sistema funcionaba perfectamente. Para el cohete anterior.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('Un integer overflow de 64-bit a 16-bit. 37 segundos de vuelo.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,224);
-    animAriane5(cv,btn);
-  }
-  else if(title==='danny cohen'){
-    await out('El hombre que nombró la guerra de los bytes.',false,60);
-    await out('Sin él, no habría nombre para el caos que ya existía.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('Big-endian vs little-endian. Una decisión que dividió arquitecturas.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,180);
-    animDannyCohen(cv,btn);
-  }
-  else if(title==='little endian'){
-    await out('Por qué todo está al revés.',false,60);
-    await out('La arquitectura que ganó no era la más lógica. Era la más conveniente.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('0x00000001 se guarda como 01 00 00 00. Siempre.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,180);
-    animLittleEndian(cv,btn);
-  }
-  else if(title==='jerry saltzer'){
-    await out('0xDEADBEEF no es un número random.',false,60);
-    await out('Alguien lo puso ahí. Alguien lo eligió. Hay una razón.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('Los magic numbers no son magia. Son memoria de alguien que estuvo antes.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,180);
-    animJerrySaltzer(cv,btn);
-  }
-
-  else if(title==='aleph one'){
-    await out('Smashing the Stack for Fun and Profit.',false,60);
-    await out('Un artículo de 1996 que le enseñó a una generación entera cómo romper software.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('Aleph One explicó los buffer overflows en Phrack #49. El exploit más leído de la historia.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,200);
-    animAlephOne(cv,btn);
-  }
-  else if(title==='gusano morris'){
-    await out('2 de noviembre de 1988. El primer gusano de internet.',false,60);
-    await out('Robert Morris tenía 23 años. Internet nunca volvió a ser lo mismo.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('Explotó fingerd, sendmail y rsh. Se replicó solo. Paralizó el 6% de internet.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,200);
-    animMorrisWorm(cv,btn);
-  }
-  else if(title==='shellshock'){
-    await out('CVE-2014-6271. Una línea de bash. 25 años sin que nadie la viera.',false,60);
-    await out('Estaba ahí desde 1989. En producción. En millones de servidores.',true,80);
-    gap(true);
-    await cmd('echo $CONTEXT',18);
-    await out('env x=&#39;() { :;}; echo vulnerable&#39; bash -c &quot;test&quot;. Así de simple. Así de devastador.',false,40);
-    gap(true);
-    const {cv,btn}=makeCanvas(560,200);
-    animShellshock(cv,btn);
-  }
-
-  gap(true);
-  await cmd('echo $SOURCE',18);
-  await out('<a href="https://github.com/t474-r0b07/ctf-writeups/tree/main/lore" target="_blank" rel="noopener">github.com/t474-r0b07/ctf-writeups/tree/main/lore</a>',true,40);
-  gap();
-  busy=false;
-  addBack(screenLore);
-}
-
-async function screenContact(){
-  busy=true;clear();
-  await cmd('cat contacts.txt',20);
-  gap(true);
-  await out('<span class="hi">t474-r0b07</span>');
-  await out('red teamer in progress · Bolivia 🇧🇴',true,40);
-  gap(true);
-  await cmd('echo $CHANNELS',18);
-  gap(true);
-  busy=false;
-  await showOpts([
-    {label:'github',   action:()=>open('https://github.com/t474-r0b07','_blank')},
-    {label:'youtube',  action:()=>open('https://youtube.com/@kaderd.garnica','_blank')},
-    {label:'email',    action:()=>open('mailto:dogar.kad@gmail.com')},
-    {label:'calendly', action:()=>open('https://calendly.com/t474_r0b07','_blank')},
-    {label:'quien soy',action:screenAbout},
-    {label:'ost · t474',action:screenOST},
-  ]);
-  gap();
-  addBack(main);
-}
-
-async function screenAbout(){
-  busy=true;clear();
-  await cmd('cat /etc/about.txt',20);
-  gap(true);
-  await out('<span class="hi">t474-r0b07</span> &nbsp;<span class="lo">// kader d. garnica</span>');
-  gap(true);
-
-  const lines = [
-    'Lic. en Comunicación Social.',
-    'Publicista. Diseñador gráfico. Filmmaker. Músico.',
-    'Desarrollador de sistemas. Red teamer en formación.',
-    '',
-    'Todo eso no es una contradicción.',
-    'Es el mismo instinto aplicado a distintos medios.',
-    '// entender cómo funciona algo. luego romperlo. luego construir algo mejor.',
-    '',
-    'Bolivia — pensando sin fronteras.',
+// ── Lou Montulli: cookie tracking chain ──────────────────────
+function animLouMontulli(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase=0;
+  const steps=[
+    {label:'user visits tienda.com',y:20},
+    {label:'tienda.com sets cookie',y:40},
+    {label:'ad from adserver.com loads',y:60},
+    {label:'adserver.com reads your cookie',y:80},
+    {label:'you visit blog.com',y:100},
+    {label:'adserver.com already knows you',y:120},
   ];
-
-  for(const l of lines){
-    await sleep(55);
-    if(l===''){gap(true);continue;}
-    const soft = l.startsWith('//') || l.startsWith('Lic') || l.startsWith('Pub') || l.startsWith('Bol');
-    await out(l, soft, 0);
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase=0;btn.classList.remove('visible');tick();};
+  function tick(){
+    t++;
+    ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('The Cookie — 1994',GW/2*SC,10*SC);
+    // reveal steps
+    const revealStep=Math.floor(t/45);
+    for(let i=0;i<Math.min(revealStep,steps.length);i++){
+      const s=steps[i];
+      const isLast=i===steps.length-1;
+      ctx.fillStyle=isLast?C.glow:i<2?C.bright:C.mid;
+      ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(`${i<2?'✓':'→'} ${s.label}`,8*SC,s.y*SC);
+      if(i>0){
+        ctx.fillStyle=C.dark;
+        ctx.fillRect(6*SC,(s.y-8)*SC,2*SC,6*SC);
+      }
+    }
+    if(revealStep>=steps.length){
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('270,000 users → 87,000,000 profiles',GW/2*SC,(GH/2+22)*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('Lou Montulli, 1994 — "I should have designed it differently"',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
   }
-
-  gap(true);
-  await cmd('echo $PHILOSOPHY',18);
-  await out('not a musician.',true,40);
-  await out('not a filmmaker.',true,30);
-  await out('not a developer.',true,30);
-  gap(true);
-  await out('all of the above. none of the above.',false,40);
-  gap(true);
-  await out('the audio is a side effect.',true,40);
-  await out('of something larger.',true,30);
-  gap();
-  busy=false;
-  addBack(screenContact);
+  tick();
 }
 
-async function screenOST(){
-  busy=true;clear();
-  await cmd('ls -la /t474/ost/',20);
-  gap(true);
-  await out('<span class="hi">t474 · original soundtrack</span>');
-  await out('// the sound of something being constructed in the dark.',true,60);
-  gap(true);
+// ── Solar Designer: ret-into-libc ────────────────────────────
+function animSolarDesigner(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase='nx',eip=null,arrow=0;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='nx';eip=null;arrow=0;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function drawStack(highlight){
+    const cells=[
+      {label:'STACK',val:'shellcode?',x:10,y:30,w:55,warn:true},
+      {label:'saved EIP',val:'→ shellcode',x:10,y:55,w:55,warn:true},
+      {label:'buf[20]',val:'AAAA....',x:10,y:75,w:55,warn:false},
+    ];
+    cells.forEach(c=>{
+      ctx.strokeStyle=c.warn?C.glow:C.mid;ctx.lineWidth=1;
+      ctx.strokeRect(c.x*SC,c.y*SC,c.w*SC,10*SC);
+      ctx.fillStyle=c.warn?C.glow:C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(c.label,(c.x+2)*SC,(c.y+7)*SC);
+      ctx.fillStyle=C.mid;ctx.textAlign='right';
+      ctx.fillText(c.val,(c.x+c.w-2)*SC,(c.y+7)*SC);
+    });
+  }
+  function drawLibc(){
+    const funcs=[
+      {name:'system()',x:160,y:30},
+      {name:'/bin/sh',x:160,y:50},
+      {name:'exit()',x:160,y:70},
+    ];
+    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+    ctx.fillText('libc (always in memory)',160*SC,22*SC);
+    funcs.forEach(f=>{
+      ctx.strokeStyle=C.mid;ctx.lineWidth=1;
+      ctx.strokeRect(f.x*SC,f.y*SC,50*SC,10*SC);
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(f.name,(f.x+2)*SC,(f.y+7)*SC);
+    });
+  }
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    if(t<80){
+      ctx.fillText('stack is NON-EXECUTABLE',GW/2*SC,12*SC);
+      ctx.fillStyle=C.dim||'#2a4a2a';ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('Solar Designer — 1997 — NX patch',GW/2*SC,20*SC);
+      // X over shellcode
+      ctx.strokeStyle=C.glow;ctx.lineWidth=SC*2;
+      ctx.beginPath();ctx.moveTo(10*SC,30*SC);ctx.lineTo(65*SC,90*SC);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(65*SC,30*SC);ctx.lineTo(10*SC,90*SC);ctx.stroke();
+    } else {
+      ctx.fillText('ret-into-libc',GW/2*SC,12*SC);
+      ctx.fillStyle=C.dim||'#2a4a2a';ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('same year. same author. different paper.',GW/2*SC,20*SC);
+      drawStack(true);
+      drawLibc();
+      // animated arrow from EIP to system()
+      arrow=Math.min(1,arrow+0.015);
+      const sx=65,sy=60,ex=160,ey=35;
+      ctx.strokeStyle=C.glow;ctx.lineWidth=SC;
+      ctx.beginPath();ctx.moveTo(sx*SC,sy*SC);
+      ctx.lineTo((sx+(ex-sx)*arrow)*SC,(sy+(ey-sy)*arrow)*SC);
+      ctx.stroke();
+      if(arrow>0.9){
+        ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+        ctx.fillText('no shellcode. no injection.',GW/2*SC,(GH/2+25)*SC);
+        ctx.fillText('the binary executes its own libc.',(GW/2)*SC,(GH/2+35)*SC);
+        btn.classList.add('visible');
+      }
+    }
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('mitigations define the next attack',(GW/2)*SC,(GH-5)*SC);
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
 
-  const tracks = [
-    {name:'FELO DE SE',      url:'https://soundcloud.com/kader-d-garnica/felo-de-se'},
-    {name:'cellophane',      url:'https://soundcloud.com/kader-d-garnica/cellophane'},
-    {name:'D3574cam3n70',    url:'https://soundcloud.com/kader-d-garnica/d3574cam3n70'},
+// ── Ken Thompson: trusting trust ─────────────────────────────
+function animKenThompson(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase='compile',infect=0;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='compile';infect=0;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  const chain=['source.c','compiler v1','compiler v2','login binary'];
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('Trusting Trust — 1984',GW/2*SC,10*SC);
+    // draw compilation chain
+    const startX=10,stepW=55,y=35;
+    chain.forEach((c,i)=>{
+      const x=startX+i*stepW;
+      const infected=i>0&&infect>i-1;
+      ctx.strokeStyle=infected?C.glow:C.mid;ctx.lineWidth=1;
+      ctx.strokeRect(x*SC,y*SC,50*SC,14*SC);
+      ctx.fillStyle=infected?C.glow:C.bright;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
+      ctx.fillText(c,(x+25)*SC,(y+9)*SC);
+      // infection label
+      if(infected){
+        ctx.fillStyle=C.glow;ctx.font=`${SC*2}px monospace`;
+        ctx.fillText('[backdoor]',(x+25)*SC,(y+18)*SC);
+      }
+      // arrow
+      if(i<chain.length-1){
+        ctx.strokeStyle=C.mid;ctx.lineWidth=1;ctx.beginPath();
+        ctx.moveTo((x+50)*SC,(y+7)*SC);ctx.lineTo((x+55)*SC,(y+7)*SC);ctx.stroke();
+      }
+    });
+    // propagate infection over time
+    if(t>40)infect=Math.min(chain.length-1,(t-40)/50);
+    // code blocks
+    const codeY=62;
+    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+    ctx.fillText('// what the auditor sees:',5*SC,codeY*SC);
+    ctx.fillStyle=C.bright;
+    ctx.fillText('if(user==root) grant_access();',5*SC,(codeY+8)*SC);
+    ctx.fillStyle=C.dim||'#1a4d1a';
+    ctx.fillText('// what the binary does:',5*SC,(codeY+18)*SC);
+    if(infect>1){
+      ctx.fillStyle=C.glow;
+      ctx.fillText('if(user==root||user=="thompson") grant_access();',5*SC,(codeY+26)*SC);
+    } else {
+      ctx.fillStyle=C.mid;
+      ctx.fillText('???',5*SC,(codeY+26)*SC);
+    }
+    if(infect>=chain.length-1){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('"You cannot trust code you did not totally create."',GW/2*SC,(GH/2+30)*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('Ken Thompson — ACM Turing Award, 1984',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Nergal / Solar: ROP chain gadgets ────────────────────────
+function animNergal(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,activeGadget=0,done=false;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;activeGadget=0;done=false;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  const chain=[
+    {label:'system()',type:'func',x:15,y:50},
+    {label:'pop/pop/ret',type:'gadget',x:65,y:50},
+    {label:'"/bin/sh"',type:'arg',x:115,y:50},
+    {label:'exit()',type:'func',x:165,y:50},
   ];
-
-  await cmd('cat tracklist.txt',18);
-  for(let i=0;i<tracks.length;i++){
-    await sleep(80);
-    await out(`<span class="lo">[${String(i+1).padStart(2,'0')}]</span> ${tracks[i].name}`,false,0);
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('ROP Chain — Phrack 58',GW/2*SC,10*SC);
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('nergal, 2001 — esp lifting',GW/2*SC,20*SC);
+    // advance active gadget
+    if(t%50===0&&activeGadget<chain.length){activeGadget++;if(activeGadget===chain.length)done=true;}
+    // draw chain
+    chain.forEach((g,i)=>{
+      const active=i<activeGadget;
+      const current=i===activeGadget-1;
+      const col=active?(g.type==='gadget'?C.dim||'#2a4a2a':C.glow):C.dark;
+      ctx.strokeStyle=current?C.white:col;ctx.lineWidth=current?2:1;
+      ctx.strokeRect(g.x*SC,g.y*SC,45*SC,14*SC);
+      ctx.fillStyle=current?C.white:col;ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
+      ctx.fillText(g.type.toUpperCase(),(g.x+22)*SC,(g.y+6)*SC);
+      ctx.fillStyle=current?C.white:active?C.bright:C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText(g.label,(g.x+22)*SC,(g.y+12)*SC);
+      if(i<chain.length-1){
+        ctx.strokeStyle=active?C.glow:C.dark;ctx.lineWidth=1;ctx.beginPath();
+        ctx.moveTo((g.x+45)*SC,(g.y+7)*SC);ctx.lineTo((g.x+50)*SC,(g.y+7)*SC);ctx.stroke();
+      }
+    });
+    // stack visualizer
+    const stackY=78;
+    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+    ctx.fillText('STACK:',5*SC,stackY*SC);
+    const stackCells=['&system','&pop/pop/ret','"/bin/sh"','&exit'];
+    stackCells.forEach((s,i)=>{
+      const active=i<activeGadget;
+      ctx.fillStyle=active?C.glow:C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText(`[ ${s} ]`,5*SC,(stackY+8+i*8)*SC);
+    });
+    if(done){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('no shellcode. no injection. just addresses.',GW/2*SC,(GH-12)*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('the blueprint for modern ROP',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
   }
-
-  gap(true);
-  await cmd('play --embed',18);
-  await sleep(200);
-
-  // SoundCloud embed — full profile widget
-  const embedWrap = document.createElement('div');
-  embedWrap.style.cssText='width:100%;max-width:560px;margin:0.6rem 0;border:1px solid #2a4a2a;overflow:hidden;';
-  const iframe = document.createElement('iframe');
-  iframe.width='100%';
-  iframe.height='300';
-  iframe.scrolling='no';
-  iframe.frameBorder='no';
-  iframe.allow='autoplay';
-  iframe.src='https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/users/1694584550&color=%2300ff41&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true';
-  embedWrap.appendChild(iframe);
-  container.appendChild(embedWrap);
-
-  gap(true);
-  await out('// or dead. hard to tell.',true,60);
-  gap();
-  busy=false;
-  addBack(screenContact);
+  tick();
 }
 
+// ── klog Phrack55: off-by-one EBP corruption ─────────────────
+function animKlog(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,corruptT=0,corrupted=false;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;corruptT=0;corrupted=false;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('Off-by-One — Phrack 55',GW/2*SC,10*SC);
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('klog, 1998',GW/2*SC,20*SC);
+    // stack layout
+    const cells=[
+      {label:'buf[16]',val:'AAAA....',y:30,key:false},
+      {label:'Saved EBP',val:corrupted?'0xffff??xx':'0xffffd9a0',y:45,key:true},
+      {label:'Saved EIP',val:'0x080484b0',y:60,key:false},
+    ];
+    cells.forEach(c=>{
+      const highlight=c.key&&corrupted;
+      ctx.strokeStyle=highlight?C.glow:C.mid;ctx.lineWidth=highlight?2:1;
+      ctx.strokeRect(10*SC,c.y*SC,160*SC,12*SC);
+      ctx.fillStyle=highlight?C.glow:C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(c.label,12*SC,(c.y+8)*SC);
+      ctx.fillStyle=highlight?C.white:C.mid;ctx.textAlign='right';
+      ctx.fillText(c.val,168*SC,(c.y+8)*SC);
+    });
+    // attack flow
+    if(t>60){
+      if(!corrupted)corruptT+=0.6;
+      if(corruptT>=16)corrupted=true;
+      // show overflow arrow
+      const filled=Math.min(16,Math.floor(corruptT));
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(`overflow: ${filled}/16 bytes... +1`,10*SC,80*SC);
+    }
+    if(corrupted){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText('leave: mov esp, ebp  ← controlled',10*SC,92*SC);
+      ctx.fillText('ret:   pop eip       ← attacker wins',10*SC,100*SC);
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('one byte. not four.',GW/2*SC,115*SC);
+      ctx.fillText('the foundation moved.',GW/2*SC,123*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('"You don\'t need four bytes if one moves the foundation."',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── execve envp: empty environment attack ────────────────────
+function animExecveEnvp(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase='normal';
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='normal';btn.classList.remove('visible');tick();};
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('execve — the third argument',GW/2*SC,10*SC);
+    if(t===80)phase='empty';
+    // code comparison
+    const normalCode=[
+      '// normal: inherited environment',
+      'execve("/bin/prog", args, environ);',
+      '',
+      '// getenv("BAD_VAR") → "evil_value"',
+      '// check fires → exit(1)',
+    ];
+    const emptyCode=[
+      '// attacker: empty environment',
+      'char *env[] = { NULL };',
+      'execve("/bin/prog", args, env);',
+      '',
+      '// getenv("BAD_VAR") → NULL',
+      '// check skipped → continue',
+    ];
+    const code=phase==='normal'?normalCode:emptyCode;
+    const codeCol=phase==='normal'?C.bright:C.glow;
+    code.forEach((line,i)=>{
+      if(!line){return;}
+      ctx.fillStyle=line.startsWith('//')?C.mid:codeCol;
+      ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(line,8*SC,(28+i*10)*SC);
+    });
+    if(phase==='empty'){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('the filter found nothing.',GW/2*SC,(GH/2+28)*SC);
+      ctx.fillText('not because it was empty.',(GW/2)*SC,(GH/2+38)*SC);
+      ctx.fillText('because the process was born without memory.',(GW/2)*SC,(GH/2+48)*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('POSIX. documented. since the 70s.',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    } else {
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('the environment is not a constant...',(GW/2)*SC,(GH-5)*SC);
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Once Upon a Free: heap exploitation ──────────────────────
+function animOnceUponFree(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,overflow=0,corrupted=false;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;overflow=0;corrupted=false;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('Heap Exploitation — Phrack 57',GW/2*SC,10*SC);
+    // heap layout
+    const chunks=[
+      {label:'chunk header',val:'size|flags',x:5,y:25,w:60,meta:true},
+      {label:'name[32]',val:'user data',x:65,y:25,w:55,meta:false},
+      {label:'chunk header',val:'size|flags',x:120,y:25,w:60,meta:true},
+      {label:'fn ptr',val:'print()',x:180,y:25,w:45,meta:false},
+    ];
+    chunks.forEach(c=>{
+      const over=!c.meta&&c.label==='name[32]'&&overflow>0;
+      const corrupt=c.meta&&c.x>100&&corrupted;
+      const fnHit=c.label==='fn ptr'&&corrupted;
+      ctx.strokeStyle=fnHit?C.glow:corrupt?C.bright:over?C.glow:C.mid;
+      ctx.lineWidth=fnHit||corrupt?2:1;
+      ctx.strokeRect(c.x*SC,c.y*SC,c.w*SC,12*SC);
+      ctx.fillStyle=fnHit?C.glow:corrupt?C.bright:C.bright;
+      ctx.font=`${SC*2}px monospace`;ctx.textAlign='center';
+      ctx.fillText(c.label,(c.x+c.w/2)*SC,(c.y+5)*SC);
+      ctx.fillStyle=fnHit?C.white:C.mid;
+      ctx.fillText(fnHit?'0x41414141':c.val,(c.x+c.w/2)*SC,(c.y+11)*SC);
+    });
+    // overflow animation
+    if(t>50){
+      overflow=Math.min(1,overflow+0.02);
+      if(overflow>0.7)corrupted=true;
+      // show bytes overflowing
+      const fillW=Math.round(overflow*55);
+      ctx.fillStyle='rgba(0,255,65,0.15)';
+      ctx.fillRect(65*SC,25*SC,fillW*SC,12*SC);
+      if(overflow>0.5){
+        // spilling into next chunk
+        const spill=Math.round((overflow-0.5)*2*60);
+        ctx.fillStyle='rgba(0,255,65,0.2)';
+        ctx.fillRect(120*SC,25*SC,Math.min(spill,60)*SC,12*SC);
+      }
+    }
+    if(corrupted){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('function pointer overwritten.',GW/2*SC,50*SC);
+      ctx.fillText('strcpy wrote past the buffer.',GW/2*SC,58*SC);
+      ctx.fillText('the heap has structure. structure has pointers.',GW/2*SC,66*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('the stack is not the only road. — Phrack 57, 2001',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── Stealth GOT: GOT overwrite via format string ──────────────
+function animStealthGOT(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,written=false,writeT=0;
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;written=false;writeT=0;btn.classList.remove('visible');tick();};
+  function px(x,y,col,w=1,h=1){ctx.fillStyle=col;ctx.fillRect(Math.round(x)*SC,Math.round(y)*SC,SC*w,SC*h);}
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('GOT Overwrite — 2000',GW/2*SC,10*SC);
+    ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+    ctx.fillText('Stealth — format string → arbitrary write',GW/2*SC,20*SC);
+    if(t>40){written=true;writeT=Math.min(1,writeT+0.015);}
+    // GOT table
+    const got=[
+      {name:'printf@GOT',before:'0xf7e5a230',after:'0xffffd9a0'},
+      {name:'putchar@GOT',before:'0xf7e6a4b0',after:'0xffffd9a0'},
+      {name:'exit@GOT',before:'0xf7e1b400',after:'0x080484b0'},
+    ];
+    ctx.fillStyle=C.dim||'#1a4d1a';ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+    ctx.fillText('Global Offset Table:',8*SC,32*SC);
+    got.forEach((g,i)=>{
+      const y=40+i*14;
+      const corrupted=written&&writeT>(i*0.3);
+      ctx.strokeStyle=corrupted?C.glow:C.mid;ctx.lineWidth=corrupted?2:1;
+      ctx.strokeRect(8*SC,y*SC,85*SC,11*SC);
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(g.name,10*SC,(y+7)*SC);
+      ctx.fillStyle=corrupted?C.glow:C.mid;ctx.textAlign='right';
+      ctx.fillText(corrupted?g.after:g.before,91*SC,(y+7)*SC);
+      if(corrupted){
+        ctx.fillStyle=C.glow;ctx.font=`${SC*2}px monospace`;ctx.textAlign='left';
+        ctx.fillText('← your address',94*SC,(y+7)*SC);
+      }
+    });
+    // %n explanation
+    if(t>80){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText('printf("%n") → writes to GOT entry',8*SC,92*SC);
+      ctx.fillText('next call to that function → your code',8*SC,100*SC);
+    }
+    if(written&&writeT>0.9){
+      ctx.fillStyle=C.glow;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('you changed a directory. the system did the rest.',GW/2*SC,115*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('any writable function pointer is an attack surface',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+// ── ProFTPD: format string in syslog ─────────────────────────
+function animProftpd(cv, btn){
+  const W=560,H=200,SC=2,GW=W/SC,GH=H/SC;
+  const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+  let t=0,raf=null,phase='safe';
+  btn.onclick=()=>{cancelAnimationFrame(raf);t=0;phase='safe';btn.classList.remove('visible');tick();};
+  function tick(){
+    t++;ctx.fillStyle=C.black;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=C.glow;ctx.font=`${SC*4}px monospace`;ctx.textAlign='center';
+    ctx.fillText('Format String — ProFTPD 2000',GW/2*SC,10*SC);
+    if(t===60)phase='vuln';
+    if(t===120)phase='exploit';
+    const safeCode=[
+      '// safe:',
+      'syslog(LOG_INFO, "%s", user_input);',
+      '//              ↑',
+      '// format string controlled by developer',
+    ];
+    const vulnCode=[
+      '// vulnerable:',
+      'syslog(LOG_INFO, user_input);',
+      '//              ↑',
+      '// format string IS the user input',
+    ];
+    const exploitCode=[
+      '// attacker sends:',
+      'username = "%x %x %x %n"',
+      '//  %x → reads stack values',
+      '//  %n → WRITES to arbitrary address',
+      '// result: arbitrary memory write → root',
+    ];
+    const code=phase==='safe'?safeCode:phase==='vuln'?vulnCode:exploitCode;
+    const codeCol=phase==='exploit'?C.glow:phase==='vuln'?C.bright:C.mid;
+    code.forEach((line,i)=>{
+      ctx.fillStyle=line.startsWith('//')?C.dim||'#2a4a2a':codeCol;
+      if(line.includes('%n'))ctx.fillStyle=C.glow;
+      ctx.font=`${SC*3}px monospace`;ctx.textAlign='left';
+      ctx.fillText(line,8*SC,(28+i*11)*SC);
+    });
+    if(phase==='exploit'){
+      ctx.fillStyle=C.bright;ctx.font=`${SC*3}px monospace`;ctx.textAlign='center';
+      ctx.fillText('one character difference.',GW/2*SC,90*SC);
+      ctx.fillText('no buffer overflow. no NOP sled.',GW/2*SC,100*SC);
+      ctx.fillText('just a format string obeying orders.',GW/2*SC,110*SC);
+      ctx.fillStyle=C.mid;ctx.font=`${SC*3}px monospace`;
+      ctx.fillText('the format function is not output. it is an interpreter.',(GW/2)*SC,(GH-5)*SC);
+      btn.classList.add('visible');
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
