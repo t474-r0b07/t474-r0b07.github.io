@@ -75,6 +75,7 @@
       cursor:pointer;text-align:left;padding:0.15rem 0;line-height:1.9;
       opacity:0;animation:optIn 0.2s forwards;
       transition:color 0.12s,padding-left 0.12s;letter-spacing:0.02em;
+      position:relative;z-index:200;
     }
     .opt::before{content:'[ ';color:var(--muted2);transition:color 0.12s;}
     .opt::after{content:' ]';color:var(--muted2);transition:color 0.12s;}
@@ -86,6 +87,7 @@
       font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:300;
       cursor:pointer;padding:0;margin-top:1.8rem;display:block;
       transition:color 0.15s;letter-spacing:0.05em;
+      position:relative;z-index:200;
     }
     .back:hover{color:var(--dim);}
     /* ── progress rows ── */
