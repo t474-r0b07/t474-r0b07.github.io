@@ -2,16 +2,6 @@
 // SCREEN LORE — t474-r0b07
 // ══════════════════════════════════════════════════════════════
 
-const C = {
-  black:  '#000a00',
-  dark:   '#0d1a0d',
-  dim:    '#1a3a1a',
-  mid:    '#2d6b2d',
-  bright: '#4dbb4d',
-  glow:   '#00ff41',
-  white:  '#ccffcc',
-};
-
 const LORE_ENTRIES = [
   // ── TECHNICAL ──────────────────────────────────────────────
   {
