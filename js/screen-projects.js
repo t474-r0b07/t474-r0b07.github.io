@@ -206,12 +206,26 @@ async function screenProjects(){
 }
 
 async function showProjectEntry(p){
-  await out('<span class="hi">'+p.label+'</span> &nbsp;<span class="lo">[ '+p.tag+' ]</span>',false,20);
-  await out(p.desc,true,20);
-  await out('<span class="lo">'+p.stack+'</span>',true,15);
-  await showOpts([
-    {label:L('open','open'), action:()=>screenProjectDetail(p)}
-  ]);
+  await sleep(35);
+  let grid=container.querySelector('.project-grid');
+  if(!grid){
+    grid=document.createElement('div');
+    grid.className='project-grid';
+    container.appendChild(grid);
+  }
+  const card=document.createElement('article');
+  card.className='project-card';
+  card.innerHTML=`
+    <div class="project-card-title"><span class="hi">${p.label}</span> <span class="lo">[ ${p.tag} ]</span></div>
+    <div class="project-card-desc">${p.desc}</div>
+    <div class="project-card-stack">${p.stack}</div>`;
+  const button=document.createElement('button');
+  button.className='opt project-open';
+  button.textContent=L('open','open');
+  button.onclick=()=>{if(!busy)screenProjectDetail(p);};
+  card.appendChild(button);
+  grid.appendChild(card);
+  requestAnimationFrame(()=>card.classList.add('shown'));
 }
 
 async function screenProjectDetail(p){
