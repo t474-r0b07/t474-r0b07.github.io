@@ -90,6 +90,41 @@
     .project-card-stack{color:var(--muted2);font-size:12px;margin-top:.8rem;line-height:1.45;}
     .project-open{margin-top:1rem;}
 
+
+    /* ── contact network ── */
+    .contact-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:1rem;
+      width:100%;
+      margin:1rem 0 1.5rem;
+    }
+    .contact-card{
+      display:flex;align-items:center;gap:1rem;
+      min-width:0;min-height:112px;padding:1rem 1.1rem;
+      border:1px solid var(--muted2);
+      background:rgba(10,31,10,.18);
+      color:var(--fg);text-decoration:none;
+      opacity:0;transform:translateY(8px);
+      transition:opacity .3s ease,transform .3s ease,border-color .15s ease,background .15s ease;
+    }
+    .contact-card.shown{opacity:1;transform:translateY(0);}
+    .contact-card:hover,.contact-card:focus{
+      border-color:var(--accent);background:rgba(10,45,10,.28);
+      color:var(--fg);outline:none;
+    }
+    .contact-icon{
+      width:32px;height:32px;flex:0 0 32px;
+      object-fit:contain;opacity:.82;
+      filter:brightness(0) saturate(100%) invert(88%) sepia(15%) saturate(600%) hue-rotate(65deg);
+    }
+    .contact-card:hover .contact-icon,.contact-card:focus .contact-icon{opacity:1;}
+    .contact-copy{min-width:0;}
+    .contact-name{display:block;color:var(--accent);font-size:clamp(15px,1.05vw,18px);font-weight:700;line-height:1.35;}
+    .contact-desc{display:block;color:var(--dim);font-size:13px;line-height:1.45;margin-top:.3rem;}
+    .contact-card.primary{border-color:var(--dim);}
+    .contact-card.primary .contact-icon{opacity:1;}
+
     .opts{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:0.15rem 2.2rem;padding-left:1.3rem;max-width:1100px;}
     .opts.row{grid-template-columns:repeat(3,minmax(180px,1fr));gap:0.3rem 1.4rem;}
     .opt{
@@ -282,7 +317,7 @@
     @media(max-width:480px){
 
       .screen{padding:2rem 1.5rem;}
-       .prow{grid-template-columns:110px 1fr 38px;}\n      .opts{grid-template-columns:1fr;}\n      .project-grid,.trajectory-grid{grid-template-columns:1fr;}
+       .prow{grid-template-columns:110px 1fr 38px;}\n      .opts{grid-template-columns:1fr;}\n      .project-grid,.trajectory-grid,.contact-grid{grid-template-columns:1fr;}
       .psection-title{font-size:9px;}
       .opts.row{grid-template-columns:1fr;}
     }
@@ -314,19 +349,19 @@
 </div>
 <div class="screen"><div id="out"></div></div>
 
-<script src="js/core.js?v=20261001-02"></script>
-<script src="js/anims.js?v=20261001-02"></script>
-<script src="js/screen-main.js?v=20261001-02"></script>
-<script src="js/screen-trajectory.js?v=20261001-02"></script>
-<script src="js/screen-media.js?v=20261001-02"></script>
-<script src="js/screen-projects.js?v=20261001-02"></script>
-<script src="js/screen-progress.js?v=20261001-02"></script>
-<script src="js/screen-lore.js?v=20261001-02"></script>
-<script src="js/screen-contact.js?v=20261001-02"></script>
-<script src="js/screen-hackball.js?v=20261001-02"></script>
-<script src="js/screen-anti-hype.js?v=20261001-02"></script>
-<script src="js/screen-git4dummies.js?v=20261001-02"></script>
-<script src="js/splash.js?v=20261001-02"></script>
+<script src="js/core.js?v=20261001-03"></script>
+<script src="js/anims.js?v=20261001-03"></script>
+<script src="js/screen-main.js?v=20261001-03"></script>
+<script src="js/screen-trajectory.js?v=20261001-03"></script>
+<script src="js/screen-media.js?v=20261001-03"></script>
+<script src="js/screen-projects.js?v=20261001-03"></script>
+<script src="js/screen-progress.js?v=20261001-03"></script>
+<script src="js/screen-lore.js?v=20261001-03"></script>
+<script src="js/screen-contact.js?v=20261001-03"></script>
+<script src="js/screen-hackball.js?v=20261001-03"></script>
+<script src="js/screen-anti-hype.js?v=20261001-03"></script>
+<script src="js/screen-git4dummies.js?v=20261001-03"></script>
+<script src="js/splash.js?v=20261001-03"></script>
 
 </body>
 </html>
