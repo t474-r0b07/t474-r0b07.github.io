@@ -14,7 +14,7 @@ async function screenContact(){
     {label:'email',    action:()=>open('mailto:dogar.kad@gmail.com')},
     {label:'calendly', action:()=>open('https://calendly.com/t474_r0b07','_blank')},
     {label:'quien soy',action:screenAbout},
-    {label:'ost · t474',action:screenOST},
+    {label:'audiovisual',action:screenMedia},
   ]);
   gap();
   addBack(main);
