@@ -3,7 +3,7 @@ async function screenContact(){
   await cmd('cat contacts.txt',20);
   gap(true);
   await out('<span class="hi">t474-r0b07</span>');
-  await out('creative technologist · systems builder · Bolivia',true,40);
+  await out(L('creative technologist · systems builder · Bolivia','creative technologist · systems builder · Bolivia'),true,40);
   gap(true);
   await cmd('echo $CHANNELS',18);
   gap(true);
@@ -28,15 +28,15 @@ async function screenAbout(){
   gap(true);
 
   const lines = [
-    'Lic. en Comunicación Social.',
-    'Publicista. Diseñador gráfico. Filmmaker. Músico.',
-    'Desarrollador de sistemas. Red teamer en formación.',
+    L('Lic. en Comunicación Social.','Degree in Social Communication.'),
+    L('Publicista. Diseñador gráfico. Filmmaker. Músico.','Advertiser. Graphic designer. Filmmaker. Musician.'),
+    L('Desarrollador de sistemas. Red teamer en formación.','Systems developer. Red teamer in training.'),
     '',
-    'Todo eso no es una contradicción.',
-    'Es el mismo instinto aplicado a distintos medios.',
-    '// entender cómo funciona algo. luego romperlo. luego construir algo mejor.',
+    L('Todo eso no es una contradicción.','None of that is a contradiction.'),
+    L('Es el mismo instinto aplicado a distintos medios.','It is the same instinct applied to different media.'),
+    '// '+L('entender cómo funciona algo. luego romperlo. luego construir algo mejor.','understand how something works. then break it. then build something better.'),
     '',
-    'Bolivia — pensando sin fronteras.',
+    L('Bolivia — pensando sin fronteras.','Bolivia — thinking without borders.'),
   ];
 
   for(const l of lines){
