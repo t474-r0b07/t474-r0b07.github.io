@@ -7,8 +7,8 @@ async function screenMedia(){
   gap(true);
 
   await cmd('ls -la /media/audio/',18);
-  await out('<span class="hi">AUDIO</span>');
-  await out(L('Música original y experimentos sonoros.','Original music and sound experiments.'),true,20);
+  await out('<span class="hi">SOUND CLOUD</span>');
+  await out(L('Meconio · música experimental de 2009. Un registro de exploración sonora, texturas y composición electrónica de esa etapa.','Meconio · experimental music from 2009. A record of sound exploration, textures and electronic composition from that period.'),true,20);
   gap(true);
 
   const audioLayout = document.createElement('div');
@@ -36,7 +36,25 @@ async function screenMedia(){
   audioLayout.appendChild(audioPanel);
   container.appendChild(audioLayout);
 
-  gap(true);
+  const flowSection = document.createElement('div');
+  flowSection.style.cssText='margin-top:1rem;display:grid;grid-template-columns:minmax(0,1fr) minmax(420px,560px);gap:2rem;align-items:start;width:100%;';
+
+  const flowText = document.createElement('div');
+  flowText.innerHTML='<div class="lo">T474-R0B07 &amp; IA</div><div class="soft" style="margin-top:.8rem;">'+L('Música generada, dirigida y producida por mí.','Music generated, directed and produced by me.')+'</div>';
+  flowSection.appendChild(flowText);
+
+  const flowPanel = document.createElement('div');
+  flowPanel.style.cssText='width:100%;border:1px solid #2a4a2a;overflow:hidden;';
+  const flow = document.createElement('iframe');
+  flow.width='100%';
+  flow.height='300';
+  flow.frameBorder='0';
+  flow.allow='autoplay';
+  flow.title='T474-R0B07 & IA · Flow Music';
+  flow.src='https://www.flowmusic.app/playlist/2b619b24-275b-42fa-ad92-ff91ee296826';
+  flowPanel.appendChild(flow);
+  flowSection.appendChild(flowPanel);
+  container.appendChild(flowSection);
 
   gap(true);
   await cmd('ls -la /media/video/',18);
@@ -45,9 +63,9 @@ async function screenMedia(){
   gap(true);
 
   const videos = [
-    {name:'Piti · Confesiones de una IA', url:'https://www.youtube.com/shorts/PedMu2800lU'},
-    {name:'Hacks-Fi · '+L('pieza seleccionada','selected short')+'', url:'https://www.tiktok.com/@t474_r0b07/video/7690703287104081173'},
-    {name:'T474verse · wIAdding', url:'https://t474-r0b07.github.io/'},
+    {name:'Piti · Confesiones de una IA', url:'https://www.youtube.com/@kaderd.garnica/playlists'},
+    {name:'Hacks-Fi', url:'https://www.youtube.com/@kaderd.garnica/playlists'},
+    {name:'T474verse · wIAdding', url:'https://www.youtube.com/@kaderd.garnica/playlists'},
   ];
 
   for(let i=0;i<videos.length;i++){
@@ -56,14 +74,9 @@ async function screenMedia(){
   }
 
   gap(true);
-  await out('// '+L('producciones reales. presentación cinematográfica.','real productions. cinematic presentation.')+'',true,50);
+  await out('// '+L('listas de reproducción en YouTube.','YouTube playlists.')+'',true,50);
   await out('// '+L('sin ficción. sin hype.','no fiction. no hype.')+'',true,50);
   gap();
   busy=false;
-  await showOpts([
-    {label:'soundcloud', action:()=>open('https://soundcloud.com/t474-r0b07','_blank')},
-    {label:'flow music', action:()=>open('https://www.flowmusic.app/playlist/2b619b24-275b-42fa-ad92-ff91ee296826','_blank')},
-    {label:'youtube', action:()=>open('https://youtube.com/@kaderd.garnica','_blank')},
-    {label:'back', action:main},
-  ]);
+  await showOpts([{label:'back', action:main}]);
 }
