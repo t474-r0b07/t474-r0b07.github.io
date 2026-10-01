@@ -3,12 +3,12 @@ async function screenMedia(){
   await cmd('cat /media/index.txt',20);
   gap(true);
   await out('<span class="hi">AUDIOVISUAL</span>');
-  await out('<span class="lo">// selected sound, image and motion work.</span>',true,40);
+  await out('<span class="lo">// '+L('selección de sonido, imagen y movimiento.','selected sound, image and motion work.')+'</span>',true,40);
   gap(true);
 
   await cmd('ls -la /media/audio/',18);
   await out('<span class="hi">AUDIO</span>');
-  await out('Original music and sound experiments.',true,20);
+  await out(L('Música original y experimentos sonoros.','Original music and sound experiments.'),true,20);
   gap(true);
 
   const tracks = [
@@ -41,19 +41,19 @@ async function screenMedia(){
   gap(true);
   await cmd('ls -la /media/audio/flow-music/',18);
   await out('<span class="hi">FLOW MUSIC</span>');
-  await out('Music player / playlist.',true,20);
+  await out(L('Reproductor musical / playlist.','Music player / playlist.'),true,20);
   await out('<span class="lo">STORM DOWN SILK</span>',true,20);
   await out('<a href="https://www.flowmusic.app/playlist/2b619b24-275b-42fa-ad92-ff91ee296826" target="_blank" rel="noopener">open playlist · STORM DOWN SILK</a>',false,0);
 
   gap(true);
   await cmd('ls -la /media/video/',18);
   await out('<span class="hi">VIDEO</span>');
-  await out('Selected audiovisual productions and experiments.',true,20);
+  await out(L('Producciones y experimentos audiovisuales seleccionados.','Selected audiovisual productions and experiments.'),true,20);
   gap(true);
 
   const videos = [
     {name:'Piti · Confesiones de una IA', url:'https://www.youtube.com/shorts/PedMu2800lU'},
-    {name:'Hacks-Fi · selected short', url:'https://www.tiktok.com/@t474_r0b07/video/7690703287104081173'},
+    {name:'Hacks-Fi · '+L('pieza seleccionada','selected short')+'', url:'https://www.tiktok.com/@t474_r0b07/video/7690703287104081173'},
     {name:'T474verse · wIAdding', url:'https://t474-r0b07.github.io/'},
   ];
 
@@ -63,8 +63,8 @@ async function screenMedia(){
   }
 
   gap(true);
-  await out('// real productions. cinematic presentation.',true,50);
-  await out('// no fiction. no hype.',true,50);
+  await out('// '+L('producciones reales. presentación cinematográfica.','real productions. cinematic presentation.')+'',true,50);
+  await out('// '+L('sin ficción. sin hype.','no fiction. no hype.')+'',true,50);
   gap();
   busy=false;
   await showOpts([
