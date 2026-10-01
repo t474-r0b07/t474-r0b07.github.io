@@ -13,7 +13,7 @@ async function screenContact(){
     {label:'youtube',  action:()=>open('https://youtube.com/@kaderd.garnica','_blank')},
     {label:'email',    action:()=>open('mailto:dogar.kad@gmail.com')},
     {label:'calendly', action:()=>open('https://calendly.com/t474_r0b07','_blank')},
-    {label:'quien soy',action:screenAbout},
+    {label:'about',action:screenAbout},
     {label:'audiovisual',action:screenMedia},
   ]);
   gap();
@@ -48,14 +48,14 @@ async function screenAbout(){
 
   gap(true);
   await cmd('echo $PHILOSOPHY',18);
-  await out('not a musician.',true,40);
-  await out('not a filmmaker.',true,30);
-  await out('not a developer.',true,30);
+  await out(L('no soy músico.','not a musician.'),true,40);
+  await out(L('no soy filmmaker.','not a filmmaker.'),true,30);
+  await out(L('no soy desarrollador.','not a developer.'),true,30);
   gap(true);
-  await out('all of the above. none of the above.',false,40);
+  await out(L('todo lo anterior. nada de lo anterior.','all of the above. none of the above.'),false,40);
   gap(true);
-  await out('the audio is a side effect.',true,40);
-  await out('of something larger.',true,30);
+  await out(L('el audio es un efecto secundario.','the audio is a side effect.'),true,40);
+  await out(L('de algo más grande.','of something larger.'),true,30);
   gap();
   busy=false;
   addBack(screenContact);
