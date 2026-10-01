@@ -3,7 +3,7 @@ async function screenContact(){
   await cmd('cat contacts.txt',20);
   gap(true);
   await out('<span class="hi">t474-r0b07</span>');
-  await out('red teamer in progress · Bolivia 🇧🇴',true,40);
+  await out('creative technologist · systems builder · Bolivia',true,40);
   gap(true);
   await cmd('echo $CHANNELS',18);
   gap(true);
@@ -60,48 +60,3 @@ async function screenAbout(){
   busy=false;
   addBack(screenContact);
 }
-
-async function screenOST(){
-  busy=true;clear();
-  await cmd('ls -la /t474/ost/',20);
-  gap(true);
-  await out('<span class="hi">t474 · original soundtrack</span>');
-  await out('// the sound of something being constructed in the dark.',true,60);
-  gap(true);
-
-  const tracks = [
-    {name:'FELO DE SE',      url:'https://soundcloud.com/kader-d-garnica/felo-de-se'},
-    {name:'cellophane',      url:'https://soundcloud.com/kader-d-garnica/cellophane'},
-    {name:'D3574cam3n70',    url:'https://soundcloud.com/kader-d-garnica/d3574cam3n70'},
-  ];
-
-  await cmd('cat tracklist.txt',18);
-  for(let i=0;i<tracks.length;i++){
-    await sleep(80);
-    await out(`<span class="lo">[${String(i+1).padStart(2,'0')}]</span> ${tracks[i].name}`,false,0);
-  }
-
-  gap(true);
-  await cmd('play --embed',18);
-  await sleep(200);
-
-  // SoundCloud embed — full profile widget
-  const embedWrap = document.createElement('div');
-  embedWrap.style.cssText='width:100%;max-width:560px;margin:0.6rem 0;border:1px solid #2a4a2a;overflow:hidden;';
-  const iframe = document.createElement('iframe');
-  iframe.width='100%';
-  iframe.height='300';
-  iframe.scrolling='no';
-  iframe.frameBorder='no';
-  iframe.allow='autoplay';
-  iframe.src='https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/users/1694584550&color=%2300ff41&auto_play=true&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=true';
-  embedWrap.appendChild(iframe);
-  container.appendChild(embedWrap);
-
-  gap(true);
-  await out('// or dead. hard to tell.',true,60);
-  gap();
-  busy=false;
-  addBack(screenContact);
-}
-
