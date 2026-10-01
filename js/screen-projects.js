@@ -1,7 +1,7 @@
 async function screenProjects(){
   busy=true;clear();
   await cmd('ls -la projects/',20);
-  await out('<span class="lo">selected work · current projects and experiments</span>',true);
+  await out('<span class="lo">'+L('trabajo seleccionado · proyectos y experimentos actuales','selected work · current projects and experiments')+'</span>',true);
   gap();
 
   const items = [
@@ -210,7 +210,7 @@ async function showProjectEntry(p){
   await out(p.desc,true,20);
   await out('<span class="lo">'+p.stack+'</span>',true,15);
   await showOpts([
-    {label:'abrir', action:()=>screenProjectDetail(p)}
+    {label:L('open','open'), action:()=>screenProjectDetail(p)}
   ]);
 }
 
@@ -219,7 +219,7 @@ async function screenProjectDetail(p){
   await cmd('cat '+p.name+'/README.md',20);
   gap(true);
   await out('<span class="hi">'+p.name+'</span> &nbsp;<span class="lo">[ '+p.tag+' ]</span>');
-  await out(p.desc,false,50);
+  await out(L(p.desc,p.desc),false,50);
   gap(true);
   await cmd('cat stack.txt',18);
   await out('<span class="lo">'+p.stack+'</span>',true,30);
