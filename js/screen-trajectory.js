@@ -1,12 +1,12 @@
 async function screenTrajectory(){
   busy=true;clear();
   await cmd('cat /trajectory/selected',20);
-  await out('<span class="hi">TRAYECTORIA</span>');
-  await out('<span class="lo">Una selección de proyectos y etapas que dejaron huella.</span>',true,25);
+  await out('<span class="hi">'+L('TRAYECTORIA','TRAJECTORY')+'</span>');
+  await out('<span class="lo">'+L('Una selección de proyectos y etapas que dejaron huella.','A selection of projects and stages that left a mark.')+'</span>',true,25);
   gap(true);
 
-  await out('<span class="lo">Antes de los repositorios, los modelos y los sistemas de IA, hubo otros proyectos.</span>',true,20);
-  await out('<span class="lo">Las herramientas cambiaron. La necesidad de construir cosas no.</span>',true,20);
+  await out('<span class="lo">'+L('Antes de los repositorios, los modelos y los sistemas de IA, hubo otros proyectos.','Before repositories, models and AI systems, there were other projects.')+'</span>',true,20);
+  await out('<span class="lo">'+L('Las herramientas cambiaron. La necesidad de construir cosas no.','The tools changed. The need to build things did not.')+'</span>',true,20);
   gap();
 
   const entries = [
@@ -30,8 +30,8 @@ async function screenTrajectory(){
     gap(true);
   }
 
-  await out('<span class="lo">Y después llegaron los sistemas.</span>',true,20);
-  await out('<span class="lo">Linux · software · seguridad · IA · producción audiovisual</span>',true,20);
+  await out('<span class="lo">'+L('Y después llegaron los sistemas.','And then the systems arrived.')+'</span>',true,20);
+  await out('<span class="lo">Linux · software · security · AI · audiovisual production</span>',true,20);
   gap();
 
   busy=false;
