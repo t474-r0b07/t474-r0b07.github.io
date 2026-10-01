@@ -29,7 +29,7 @@
     html{background:#000;min-height:100%;}
     body{
       width:100%;min-height:100vh;background:var(--bg);color:var(--fg);
-      font-family:'Share Tech Mono',monospace;font-size:clamp(16px,1.15vw,19px);line-height:1.75;
+      font-family:'Share Tech Mono',monospace;font-size:clamp(18px,1.3vw,21px);line-height:1.75;
       box-shadow:inset 0 0 120px rgba(0,255,65,0.04);
       border-radius:8px;overflow-y:auto;overflow-x:hidden;
       animation:flicker 9s infinite;
@@ -62,8 +62,8 @@
     .out-line{display:flex;align-items:baseline;gap:0.5rem;opacity:0;transition:opacity 0.15s;}
     .out-line.shown{opacity:1;}
     .arrow{color:var(--arrow);font-size:13px;font-weight:300;flex-shrink:0;}
-    .out-text{color:var(--fg);font-size:clamp(16px,1.15vw,19px);font-weight:700;letter-spacing:0.01em;}
-    .out-text.soft{font-weight:400;color:var(--dim);font-size:clamp(14px,1vw,17px);}
+    .out-text{color:var(--fg);font-size:clamp(18px,1.3vw,21px);font-weight:700;letter-spacing:0.01em;}
+    .out-text.soft{font-weight:400;color:var(--dim);font-size:clamp(16px,1.1vw,19px);}
     .out-text .hi{color:var(--accent);font-weight:700;}
     .out-text .lo{color:var(--dim);font-weight:300;font-size:13px;}
     .gap{height:1.1rem;}.gap-sm{height:0.5rem;}
@@ -86,7 +86,7 @@
     .project-card.shown,.trajectory-card.shown{opacity:1;transform:translateY(0);}
     .project-card:hover,.trajectory-card:hover{border-color:var(--dim);}
     .project-card-title,.trajectory-title{font-size:clamp(15px,1.05vw,18px);font-weight:700;margin-bottom:.65rem;}
-    .project-card-desc,.trajectory-desc{color:var(--dim);font-size:clamp(13px,.9vw,16px);line-height:1.55;}
+    .project-card-desc,.trajectory-desc{color:var(--dim);font-size:clamp(15px,1vw,18px);line-height:1.55;}
     .project-card-stack{color:var(--muted2);font-size:12px;margin-top:.8rem;line-height:1.45;}
     .project-open{margin-top:1rem;}
 
@@ -94,7 +94,7 @@
     .opts.row{grid-template-columns:repeat(3,minmax(180px,1fr));gap:0.3rem 1.4rem;}
     .opt{
       background:none;border:none;color:var(--dim);
-      font-family:'Share Tech Mono',monospace;font-size:clamp(14px,0.95vw,17px);font-weight:300;
+      font-family:'Share Tech Mono',monospace;font-size:clamp(16px,1.05vw,19px);font-weight:300;
       cursor:pointer;text-align:left;padding:0.15rem 0;line-height:1.9;
       opacity:0;animation:optIn 0.2s forwards;
       transition:color 0.12s,padding-left 0.12s;letter-spacing:0.02em;
