@@ -25,7 +25,7 @@ async function addBar(label0,label1,pct,note,cls){
 async function screenProgress(){
   busy=true;clear();
   await cmd('tail -f progress.log',20);
-  await out('<span class="lo">reading live state...</span>',true,30);
+  await out('<span class="lo">estado actual del trabajo...</span>',true,30);
   gap();
 
   busy=false;
@@ -34,39 +34,43 @@ async function screenProgress(){
   await addSection('wargames');
   await addBar('OTW','Bandit',100,'34/34','done');
   await addBar('OTW','Leviathan',100,'8/8','done');
-  await addBar('OTW','Narnia',35,'active','warn');
-  await addBar('HTB','active player',35,'35%','warn');
+  await addBar('OTW','Narnia',100,'12/12','done');
+  await addBar('THM','writeups',100,'10/10','done');
 
-  // — certifications —
-  await addSection('path');
-  await addBar('red team','certification',8,'queued','crit');
-  await addBar('first','CVE',2,'endgame ←','crit');
+  // — proyectos —
+  await addSection('proyectos');
+  const projects=[
+    ['SCCP-DTEX','development'],
+    ['SCCP-Mobile','development'],
+    ['MPC','private'],
+    ['T474verse / wIAdding','in production'],
+    ['Piti / Confesiones de una IA','ongoing'],
+    ['Hacks-Fi','ongoing'],
+  ];
+
+  for(const [name,status] of projects){
+    const row=document.createElement('div');
+    row.className='prow';
+    row.innerHTML=`<span class="plabel"><strong>${name}</strong> ${status}</span><div class="pbar"><div class="pfill warn" style="width:0%"></div></div><span class="ppct">[${status}]</span>`;
+    container.appendChild(row);
+    await sleep(50);
+    row.classList.add('shown');
+    const fill=row.querySelector('.pfill');
+    await sleep(80);
+    fill.style.width='100%';
+  }
 
   gap();
 
-  // — incident archive —
-  await cmd('cat incident_archive.log',18);
-  await sleep(200);
-
-  await addSection('real incidents');
-
-  const incidents=[
-    {label0:'2026.01',label1:'prison admin workstation',note:'[terminated]',pct:100,cls:'done'},
-    {label0:'2026.03',label1:'rogue gateway / OEP-SERECI',note:'[isolated]',pct:100,cls:'done'},
-    {label0:'2026.04',label1:'VCR surveillance intrusion',note:'[contained]',pct:92,cls:'warn'},
-  ];
-
-  for(const i of incidents){
-    await addBar(i.label0,i.label1,i.pct,i.note,i.cls);
-  }
-
-  gap(true);
-
-  await out('<span class="lo">2026.01 —</span> unauthorized remote access on prison administration system. detected via anomaly in active sessions.',true,18);
+  // — repositorios activos —
+  await addSection('repositorios activos');
+  await out('<span class="lo">CTF Writeups —</span> Bandit, Leviathan y Narnia completos; 10 writeups de TryHackMe publicados.',true,18);
   await sleep(100);
-  await out('<span class="lo">2026.03 —</span> rogue gateway (Xiaomi / MOBILETECBO.LOCAL) performing ARP sweep + DNS hijack against OEP/SERECI assets at institutional fair. isolated. MAC blacklisted.',true,18);
+  await out('<span class="lo">Git4dummies —</span> colección documental activa, con nuevos materiales todavía en desarrollo.',true,18);
   await sleep(100);
-  await out('<span class="lo">2026.04 —</span> intrusion attempt against surveillance recorder. traffic pattern identified. access vector blocked.',true,18);
+  await out('<span class="lo">Lore —</span> índice actualizado con la colección histórica de vulnerabilidades y cultura de explotación.',true,18);
+  await sleep(100);
+  await out('<span class="lo">Anti-Hype —</span> índice actualizado con los artículos publicados en el repositorio.',true,18);
 
   gap();
 
@@ -74,7 +78,7 @@ async function screenProgress(){
   footer.className='live-footer';
   footer.innerHTML=`
     <div class="scan">$ monitor --live</div>
-    <div class="scan">listening for anomalies<span class="blinkdot"></span></div>
+    <div class="scan">estado del sistema<span class="blinkdot"></span></div>
   `;
   container.appendChild(footer);
 
