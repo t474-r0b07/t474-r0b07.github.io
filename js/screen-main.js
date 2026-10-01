@@ -8,8 +8,6 @@ async function main(){
   await out(L('creative technologist &nbsp;·&nbsp; systems builder','creative technologist &nbsp;·&nbsp; systems builder'));
   await out('<span class="lo">'+L('comunicación · tecnología · sistemas · IA · audiovisual','communication · technology · systems · AI · audiovisual')+'</span>',true,20);
   gap(true);
-  await cmd('ls -la',20);
-  await out('<span class="lo">'+L('projects &nbsp; trajectory &nbsp; progress &nbsp; lore &nbsp; hackball &nbsp; audiovisual &nbsp; anti_hype &nbsp; git4dummies &nbsp; contact','projects &nbsp; trajectory &nbsp; progress &nbsp; lore &nbsp; hackball &nbsp; audiovisual &nbsp; anti_hype &nbsp; git4dummies &nbsp; contact')+'</span>',true,30);
   gap();
   busy=false;
   await showOpts([
