@@ -39,15 +39,22 @@ async function screenMedia(){
   container.appendChild(audioWrap);
 
   gap(true);
+  await cmd('ls -la /media/audio/flow-music/',18);
+  await out('<span class="hi">FLOW MUSIC</span>');
+  await out('Music player / playlist.',true,20);
+  await out('<span class="lo">STORM DOWN SILK</span>',true,20);
+  await out('<a href="https://www.flowmusic.app/playlist/2b619b24-275b-42fa-ad92-ff91ee296826" target="_blank" rel="noopener">open playlist · STORM DOWN SILK</a>',false,0);
+
+  gap(true);
   await cmd('ls -la /media/video/',18);
   await out('<span class="hi">VIDEO</span>');
   await out('Selected audiovisual productions and experiments.',true,20);
   gap(true);
 
   const videos = [
-    {name:'Piti · selected short', url:'https://www.youtube.com/shorts/PedMu2800lU'},
+    {name:'Piti · Confesiones de una IA', url:'https://www.youtube.com/shorts/PedMu2800lU'},
     {name:'Hacks-Fi · selected short', url:'https://www.tiktok.com/@t474_r0b07/video/7690703287104081173'},
-    {name:'STORM DOWN SILK · Flow Music', url:'https://www.flowmusic.app/playlist/2b619b24-275b-42fa-ad92-ff91ee296826'},
+    {name:'T474verse · wIAdding', url:'https://t474-r0b07.github.io/'},
   ];
 
   for(let i=0;i<videos.length;i++){
