@@ -15,10 +15,22 @@ async function screenGit4Dummies(){
   gap(true);
   busy=false;
   await showOpts([
-    {label:'00_setup · SSH keys',         action:()=>open('https://github.com/t474-r0b07/git4dummies/blob/main/00_setup/ssh-keys.md','_blank')},
-    {label:'01_local · estructura repo',  action:()=>open('https://github.com/t474-r0b07/git4dummies/blob/main/01_local/estructura-repo.md','_blank')},
-    {label:'ver repo completo',           action:()=>open('https://github.com/t474-r0b07/git4dummies','_blank')},
-    {label:'hall of luminous',            action:screenHallOfLuminous},
+    {label:'00 · SSH keys', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/00_ssh-keys.md','_blank')},
+    {label:'01 · estructura repo', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/01_estructura-repo.md','_blank')},
+    {label:'02 · orígenes', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/02_origenes.md','_blank')},
+    {label:'02 · origins [EN]', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/02_origins.md','_blank')},
+    {label:'03 · conflictos', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/03_conflictos.md','_blank')},
+    {label:'03 · público / privado', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/03_publico-privado.md','_blank')},
+    {label:'04 · Actions', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/04_actions.md','_blank')},
+    {label:'04 · Pages', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/04_pages.md','_blank')},
+    {label:'05 · Pages', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/05_pages.md','_blank')},
+    {label:'06 · Issues', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/06_issues.md','_blank')},
+    {label:'07 · Pull Requests', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/07_pull_requests.md','_blank')},
+    {label:'08 · Code Review', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/08_code_review.md','_blank')},
+    {label:'09 · Automatización', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/09_automatizacion.md','_blank')},
+    {label:'hall of luminous', action:screenHallOfLuminous},
+    {label:'README', action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/README.md','_blank')},
+    {label:'ver repo completo', action:()=>open('https://github.com/t474-r0b07/Git4dummies','_blank')},
   ]);
   gap();
   addBack(main);
@@ -42,8 +54,8 @@ async function screenHallOfLuminous(){
   gap(true);
   busy=false;
   await showOpts([
-    {label:'ver el repo',         action:()=>open('https://github.com/t474-r0b07/git4dummies','_blank')},
-    {label:'ver hall of luminous',action:()=>open('https://github.com/t474-r0b07/git4dummies/blob/main/HALL_OF_LUMINOUS.md','_blank')},
+    {label:'ver el repo', action:()=>open('https://github.com/t474-r0b07/Git4dummies','_blank')},
+    {label:'ver hall of luminous',action:()=>open('https://github.com/t474-r0b07/Git4dummies/blob/main/HALL_OF_LUMINOUS.md','_blank')},
   ]);
   gap();
   addBack(screenGit4Dummies);
