@@ -24,10 +24,16 @@ async function screenTrajectory(){
      'Una de las primeras empresas en Sucre en incorporar impresión látex y UV, además de tecnologías como micropor.']
   ];
 
+  const grid=document.createElement('div');
+  grid.className='trajectory-grid';
+  container.appendChild(grid);
   for(const [title,desc] of entries){
-    await out('<span class="hi">'+title+'</span>',false,20);
-    await out('<span class="soft">'+desc+'</span>',true,20);
-    gap(true);
+    await sleep(35);
+    const card=document.createElement('article');
+    card.className='trajectory-card';
+    card.innerHTML='<div class="trajectory-title">'+title+'</div><div class="trajectory-desc">'+desc+'</div>';
+    grid.appendChild(card);
+    requestAnimationFrame(()=>card.classList.add('shown'));
   }
 
   await out('<span class="lo">'+L('Y después llegaron los sistemas.','And then the systems arrived.')+'</span>',true,20);
