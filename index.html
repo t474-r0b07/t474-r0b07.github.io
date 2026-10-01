@@ -212,6 +212,32 @@
       from{opacity:0;} to{opacity:0.7;}
     }
 
+    .language-panel{
+      margin-top:1.6rem;
+      text-align:center;
+      opacity:0;
+      animation:languageIn .45s .1s forwards;
+    }
+    .language-title{
+      font-size:12px;color:var(--dim);letter-spacing:.18em;margin-bottom:.8rem;
+    }
+    .language-options{
+      display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;
+    }
+    .language-options button{
+      background:none;border:1px solid var(--muted2);color:var(--dim);
+      font-family:'Share Tech Mono',monospace;font-size:14px;padding:.5rem 1rem;
+      cursor:pointer;letter-spacing:.04em;
+    }
+    .language-options button:hover{
+      color:var(--accent);border-color:var(--accent);
+    }
+    .language-panel.selected{opacity:0;transition:opacity .2s;}
+    @keyframes languageIn{
+      from{opacity:0;transform:translateY(6px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
     /* ── canvas banners ── */
     .anim-wrap{
       position:relative;width:100%;max-width:560px;
@@ -288,19 +314,19 @@
 </div>
 <div class="screen"><div id="out"></div></div>
 
-<script src="js/core.js"></script>
-<script src="js/anims.js"></script>
-<script src="js/screen-main.js"></script>
-<script src="js/screen-trajectory.js"></script>
-<script src="js/screen-media.js"></script>
-<script src="js/screen-projects.js"></script>
-<script src="js/screen-progress.js"></script>
-<script src="js/screen-lore.js"></script>
-<script src="js/screen-contact.js"></script>
-<script src="js/screen-hackball.js"></script>
-<script src="js/screen-anti-hype.js"></script>
-<script src="js/screen-git4dummies.js"></script>
-<script src="js/splash.js"></script>
+<script src="js/core.js?v=20261001-02"></script>
+<script src="js/anims.js?v=20261001-02"></script>
+<script src="js/screen-main.js?v=20261001-02"></script>
+<script src="js/screen-trajectory.js?v=20261001-02"></script>
+<script src="js/screen-media.js?v=20261001-02"></script>
+<script src="js/screen-projects.js?v=20261001-02"></script>
+<script src="js/screen-progress.js?v=20261001-02"></script>
+<script src="js/screen-lore.js?v=20261001-02"></script>
+<script src="js/screen-contact.js?v=20261001-02"></script>
+<script src="js/screen-hackball.js?v=20261001-02"></script>
+<script src="js/screen-anti-hype.js?v=20261001-02"></script>
+<script src="js/screen-git4dummies.js?v=20261001-02"></script>
+<script src="js/splash.js?v=20261001-02"></script>
 
 </body>
 </html>
