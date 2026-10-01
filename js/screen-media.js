@@ -62,8 +62,21 @@ async function screenMedia(){
   await out(L('Producciones y experimentos audiovisuales seleccionados.','Selected audiovisual productions and experiments.'),true,20);
   gap(true);
 
+  const confesionesPanel = document.createElement('div');
+  confesionesPanel.style.cssText='width:100%;max-width:560px;margin:0 0 1.5rem auto;border:1px solid #2a4a2a;overflow:hidden;';
+  const confesiones = document.createElement('iframe');
+  confesiones.width='100%';
+  confesiones.height='315';
+  confesiones.frameBorder='0';
+  confesiones.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+  confesiones.referrerPolicy='strict-origin-when-cross-origin';
+  confesiones.allowFullscreen=true;
+  confesiones.title='Piti · Confesiones de una IA';
+  confesiones.src='https://www.youtube.com/embed/videoseries?si=2LDJqhg-pY-gM28V&list=PLalkKvZ5S-LM';
+  confesionesPanel.appendChild(confesiones);
+  container.appendChild(confesionesPanel);
+
   const videos = [
-    {name:'Piti · Confesiones de una IA', url:'https://www.youtube.com/@kaderd.garnica/playlists'},
     {name:'Hacks-Fi', url:'https://www.youtube.com/@kaderd.garnica/playlists'},
     {name:'T474verse · wIAdding', url:'https://www.youtube.com/@kaderd.garnica/playlists'},
   ];
