@@ -4,7 +4,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const LANG_KEY = 't474_language';
 let language = localStorage.getItem(LANG_KEY) || 'es';
-function setLanguage(next){ language=next; localStorage.setItem(LANG_KEY,next); }
+function setLanguage(next){ language=next; localStorage.setItem(LANG_KEY,next); document.documentElement.lang=next; }
 function L(es,en){ return language === 'en' ? en : es; }
 
 function gap(sm){ const e=document.createElement('div');e.className=sm?'gap-sm':'gap';container.appendChild(e); }
