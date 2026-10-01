@@ -11,17 +11,17 @@ async function screenTrajectory(){
 
   const entries = [
     ['Dirección de Comunicación — Prefectura de Chuquisaca',
-     'Comunicación institucional y gestión de proyectos de comunicación pública.'],
+     L('Comunicación institucional y gestión de proyectos de comunicación pública.','Institutional communication and public communication project management.')],
     ['Creando Cultura Tributaria — Impuestos Nacionales',
-     'Proyecto comunicacional de gran escala orientado a generar cultura tributaria.'],
+     L('Proyecto comunicacional de gran escala orientado a generar cultura tributaria.','Large-scale communication project focused on building tax culture.')],
     ['Valientas — Universidad Andina',
-     'Proyecto orientado al desarrollo de liderazgo femenino en Bolivia.'],
+     L('Proyecto orientado al desarrollo de liderazgo femenino en Bolivia.','Project focused on developing women leadership in Bolivia.')],
     ['TVCM — Plan International',
-     'Proyecto de participación y valoración comunitaria en el ámbito municipal.'],
+     L('Proyecto de participación y valoración comunitaria en el ámbito municipal.','Project focused on participation and community engagement at the municipal level.')],
     ['Wellness Life',
-     'Impulso y desarrollo de proyectos vinculados al bienestar.'],
+     L('Impulso y desarrollo de proyectos vinculados al bienestar.','Development and promotion of projects related to wellbeing.')],
     ['Macropublicidad — Impulso Creativo, Sucre',
-     'Una de las primeras empresas en Sucre en incorporar impresión látex y UV, además de tecnologías como micropor.']
+     L('Una de las primeras empresas en Sucre en incorporar impresión látex y UV, además de tecnologías como micropor.','One of the first companies in Sucre to adopt latex and UV printing, along with technologies such as micropor.')]
   ];
 
   const grid=document.createElement('div');
